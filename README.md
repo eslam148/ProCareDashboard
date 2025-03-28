@@ -248,6 +248,8 @@ Thanks to all the backers and sponsors! Support this project by [becoming a back
 
 ## Copyright and License
 
+https://coreui.io/demos/bootstrap/5.4/default/?theme=light
+
 copyright 2025 creativeLabs Łukasz Holeczek.
 
 Code released under [the MIT license](https://github.com/coreui/coreui-free-react-admin-template/blob/master/LICENSE).
