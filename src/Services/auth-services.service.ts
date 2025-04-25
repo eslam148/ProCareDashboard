@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../environments/environment'; // Adjusted import path
-import { LoginResponse } from '../app/Model/ResponseModel';
+ import { LoginResponse } from '../app/Model/ResponseModel';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthServicesService {
-  private baseUrl = environment.API_URL; // Use API_URL from environment
+  private baseUrl ="http://procare.runasp.net"// environment.API_URL; // Use API_URL from environment
 
   constructor(private httpClient: HttpClient) {}
 

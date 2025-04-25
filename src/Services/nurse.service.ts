@@ -8,7 +8,7 @@ import { environment } from '../environments/environment';
   providedIn: 'root'
 })
 export class NurseService {
-  private baseUrl = environment.API_URL; 
+  private baseUrl = "http://procare.runasp.net"//environment.API_URL; 
   constructor(private http: HttpClient) { }
   
   getNurses(pageNumber: number, pageSize: number, searchKey: string) {
@@ -29,7 +29,7 @@ export class NurseService {
     return this.http.put<NurseRegistration>(`${this.baseUrl}/api/Nurse/${nurse.userData.id}`, nurse);
   }
   deleteNurse(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/api/Nurse/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/api/Nurse/DeletNurse/${id}`);
   }
   searchNurses(query: string): Observable<NurseRegistration[]> {
     return this.http.get<NurseRegistration[]>(`${this.baseUrl}/nurses/search`, { params: { query } });

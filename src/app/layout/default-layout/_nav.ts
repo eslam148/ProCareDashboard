@@ -2,6 +2,38 @@ import { INavData } from '@coreui/angular';
 
 export const navItems: INavData[] = [
   {
+    name: 'Admin',
+    url: '/base',
+    iconComponent: { name: 'cil-puzzle' },
+    children: [
+      {
+        name: 'Add Admins',
+        url: 'Add-Admin',
+        iconComponent: { name: 'cil-speedometer' },
+      },
+      {
+        name: 'Show Admins',
+        url: 'Show-Admins',
+        iconComponent: { name: 'cil-speedometer' },
+      },
+    ]
+  },
+  {
+    name: 'Category',
+    url: '/Category',
+    iconComponent: { name: 'cil-speedometer' },
+    badge: {
+      color: 'info',
+      text: 'NEW'
+    }
+  },
+  {
+    name: 'Add Nures',
+    url: '/AddNures',
+    iconComponent: { name: 'cil-speedometer' }
+     
+  },
+  {
     name: 'Dashboard',
     url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },

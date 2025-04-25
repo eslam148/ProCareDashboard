@@ -1,0 +1,115 @@
+<!--  
+
+<c-row>
+    <c-col xs>
+      <c-card class="mb-4">
+        <c-card-body> 
+            <table
+              [hover]="true"
+              [responsive]="true"
+              [striped]="true"
+              align="middle"
+              cTable
+              class="mb-0 border"
+            >
+            <thead class="text-nowrap text-truncate">
+              <tr>
+                <th class="bg-body-tertiary">First Name</th>
+                <th class="bg-body-tertiary">Last Name</th>
+                <th class="bg-body-tertiary">Phone Number</th>
+                <th class="bg-body-tertiary text-center ">
+                    <svg cIcon name="cilPeople"></svg>
+                  </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let admin of admins.data.items">
+                <td>{{ admin.firstName }}</td>
+                <td>{{ admin.lastName }}</td>
+                <td>{{ admin.phoneNumber }}</td>
+                <td class="text-center">
+                    <c-avatar [size]="'md'" src="./assets/images/avatars/1.jpg" status="success" />
+                  </td>
+                
+              </tr> 
+            </tbody>
+          </table>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+   -->
+   <app-widgets-brand [withCharts]="true" />
+    <c-row>
+        <c-col xs>
+        <c-card class="mb-4">
+            <c-card-body> 
+            <div class="mb-3">
+              <input type="text" class="form-control" placeholder="Search by First Name" [(ngModel)]="searchQuery" (input)="filterAdmins()">
+            </div>
+            <table
+                [hover]="true"
+                [responsive]="true"
+                [striped]="true"
+                align="middle"
+                cTable
+                class="mb-0 border"
+            >
+                <thead class="text-nowrap text-truncate">
+                <tr>
+                    <th class="bg-body-tertiary text-center "></th>
+                    <th class="bg-body-tertiary">First Name</th>
+                    <th class="bg-body-tertiary">Last Name</th>
+                    <th class="bg-body-tertiary">Phone Number</th>
+                    <th class="bg-body-tertiary text-center">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let user of admins.data.items;  let i = index">
+                  <td class="text-center">
+                      <c-avatar [size]="'md'" src="../../assets/images/avatars/2.jpg" status="success" />
+                  </td>
+                  <td>{{ user.firstName }}</td>
+                  <td>{{ user.lastName }}</td>
+                  <td>{{ user.phoneNumber }}</td>
+                  <td class="text-center">
+                      <button class="btn btn-danger btn-sm" (click)="openDeleteModal(user)">Delete</button>
+                  </td>
+                </tr>
+                </tbody>
+            </table>
+            <nav aria-label="Page navigation example">
+              <ul class="pagination justify-content-center">
+                <li class="page-item" [class.disabled]="currentPage === 1">
+                  <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+                </li>
+                <li class="page-item" *ngFor="let page of (admins.totalCount > 0 && pageSize > 0 ? [].constructor(Math.ceil(admins.totalCount / pageSize)) : []); let i = index" [class.active]="currentPage === i + 1">
+                  <button class="page-link" (click)="goToPage(i + 1)">{{ i + 1 }}</button>
+                </li>
+                <li class="page-item" [class.disabled]="currentPage === Math.ceil(admins.totalCount / pageSize)">
+                  <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === Math.ceil(admins.totalCount / pageSize)">Next</button>
+                </li>
+              </ul>
+            </nav>
+            </c-card-body>
+        </c-card>
+        </c-col>
+    </c-row>
+
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete <strong>{{ selectedAdmin?.firstName }} {{ selectedAdmin?.lastName }}</strong>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

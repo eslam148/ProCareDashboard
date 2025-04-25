@@ -10,8 +10,9 @@ import { FormsModule } from '@angular/forms';
     imports: [FormsModule,ContainerComponent, RowComponent, ColComponent, TextColorDirective, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, IconDirective, FormControlDirective, ButtonDirective]
 })
 export class RegisterComponent {
-  username: string = '';
-  email: string = '';
+  firstName: string = '';
+  lastName: string = '';
+  phoneNumber: string = '';
   password: string = '';
   confirmPassword: string = '';
 
@@ -22,7 +23,13 @@ export class RegisterComponent {
       alert('Passwords do not match!');
       return;
     }
-    const user = { username: this.username, email: this.email, password: this.password };
+    const user = {
+      firstName: this.firstName,
+      lastName: this.lastName,
+      phoneNumber: this.phoneNumber,
+      password: this.password,
+      confirmPassword: this.confirmPassword
+    };
     this.authService.register(user).subscribe({
       next: () => alert('Registration successful!'),
       error: (err) => alert('Registration failed: ' + err.message)

@@ -4,6 +4,8 @@ import { IconDirective } from '@coreui/icons-angular';
 import { ContainerComponent, RowComponent, ColComponent, CardGroupComponent, TextColorDirective, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
 import { AuthServicesService } from '../../../../Services/auth-services.service';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
@@ -11,13 +13,21 @@ import { FormsModule } from '@angular/forms';
     imports: [FormsModule,ContainerComponent, RowComponent, ColComponent, CardGroupComponent, TextColorDirective, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, IconDirective, FormControlDirective, ButtonDirective, NgStyle]
 })
 export class LoginComponent {
-  constructor(private authService: AuthServicesService) { }
+  phoneNumber:string ="";
+  password:string="";
+  constructor(private authService: AuthServicesService, private router: Router) {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/']); // Redirect to '/' if already authenticated
+    }
+  }
 
-  login(credentials: { username: string; password: string }) {
+  login(credentials: { phoneNumber: string; password: string }) {
     this.authService.login(credentials).subscribe({
       next: (response) => {
-        console.log('Login successful', response);
-        // localStorage.setItem('authToken', response.token); // Assuming response contains a token
+        if(response.status != 1){
+        localStorage.setItem('authToken', response.data.token); // Assuming response contains a token
+        this.router.navigate(['/']); // Redirect to '/' on successful login
+        }
       },
       error: (error) => {
         console.error('Login failed', error);

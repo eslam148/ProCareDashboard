@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { environment } from '../environments/environment';
-import { City, Governorate, Specialty } from '../app/Model/Address';
+ import { City, Governorate, Specialty } from '../app/Model/Address';
 import { Observable } from 'rxjs';
 import { GeneralResponse } from '../app/Model/GeneralResponse';
 
@@ -9,7 +8,7 @@ import { GeneralResponse } from '../app/Model/GeneralResponse';
   providedIn: 'root'
 })
 export class AddressService {
-    private baseUrl = environment.API_URL; // Use API_URL from environment
+    private baseUrl ="http://procare.runasp.net" //environment.API_URL; // Use API_URL from environment
    constructor(private http: HttpClient) { }
     getCities() :Observable<GeneralResponse<City[]>> {
       return this.http.get<GeneralResponse<City[]>>(`${this.baseUrl}/api/City/GetAllCities`);

@@ -11,11 +11,19 @@
                 <span cInputGroupText>
                   <svg cIcon name="cilUser"></svg>
                 </span>
-                <input autoComplete="name" cFormControl placeholder="Username" [(ngModel)]="username" name="username" />
+                <input autoComplete="given-name" cFormControl placeholder="First Name" [(ngModel)]="firstName" name="firstName" />
               </c-input-group>
               <c-input-group class="mb-3">
-                <span cInputGroupText>&#64;</span>
-                <input autoComplete="email" cFormControl placeholder="Email" [(ngModel)]="email" name="email" />
+                <span cInputGroupText>
+                  <svg cIcon name="cilUser"></svg>
+                </span>
+                <input autoComplete="family-name" cFormControl placeholder="Last Name" [(ngModel)]="lastName" name="lastName" />
+              </c-input-group>
+              <c-input-group class="mb-3">
+                <span cInputGroupText>
+                  <svg cIcon name="cilPhone"></svg>
+                </span>
+                <input autoComplete="tel" cFormControl placeholder="Phone Number" [(ngModel)]="phoneNumber" name="phoneNumber" />
               </c-input-group>
               <c-input-group class="mb-3">
                 <span cInputGroupText>

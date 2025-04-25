@@ -1,8 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../environments/environment';
-import { GeneralResponse } from '../app/Model/GeneralResponse';
+ import { GeneralResponse } from '../app/Model/GeneralResponse';
 import { AddSubCategoryRequest, Category, SubCategoryRequest } from '../app/Model/Category';
 
 @Injectable({
@@ -10,7 +9,7 @@ import { AddSubCategoryRequest, Category, SubCategoryRequest } from '../app/Mode
 })
 export class CategoryService {
 
-    private baseUrl = environment.API_URL; // Use API_URL from environment
+    private baseUrl ="http://procare.runasp.net" // environment.API_URL; // Use API_URL from environment
 
   constructor(private http: HttpClient) { }
 

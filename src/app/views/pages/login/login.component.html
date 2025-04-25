@@ -5,14 +5,14 @@
         <c-card-group>
           <c-card class="p-4">
             <c-card-body>
-              <form cForm (ngSubmit)="login({ username, password })">
+              <form cForm (ngSubmit)="login({ phoneNumber, password })">
                 <h1>Login</h1>
                 <p class="text-body-secondary">Sign In to your account</p>
                 <c-input-group class="mb-3">
                   <span cInputGroupText>
                     <svg cIcon name="cilUser"></svg>
                   </span>
-                  <input autoComplete="username" cFormControl placeholder="Username" [(ngModel)]="username" name="username" />
+                  <input autoComplete="phone Number" cFormControl placeholder="phoneNumber" [(ngModel)]="phoneNumber" name="username" />
                 </c-input-group>
                 <c-input-group class="mb-4">
                   <span cInputGroupText>

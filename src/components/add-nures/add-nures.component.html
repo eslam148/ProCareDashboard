@@ -1,0 +1,260 @@
+<!-- <form [formGroup]="nurseForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
+    <div formGroupName="userData">
+      <input formControlName="firstName" placeholder="First Name">
+      <input formControlName="lastName" placeholder="Last Name">
+      <input formControlName="phoneNumber" placeholder="Phone Number">
+      <input formControlName="password" type="password" placeholder="Password">
+      <input formControlName="confirmPassword" type="password" placeholder="Confirm Password">
+    </div>
+  
+    <input formControlName="cityId" placeholder="City ID" type="number">
+    <input formControlName="governorateId" placeholder="Governorate ID" type="number">
+    <input formControlName="specialtyId" placeholder="Specialty ID" type="number">
+    <input formControlName="latitude" placeholder="Latitude">
+    <input formControlName="longitude" placeholder="Longitude">
+    <input formControlName="medicalLicense" placeholder="Medical License">
+  
+    <input type="file" (change)="onFileChange($event)">
+  
+    <button type="submit">Register Nurse</button>
+  </form>
+   -->
+
+   
+  <c-row>
+    <c-col xs>
+    <c-card class="mb-4">
+        <c-card-body> 
+          <!-- <button (click)="toggleLiveDemo()" cButton>Launch demo modal</button> -->
+
+        <button class="btn btn-primary mb-3" (click)="ShowAddNurse()">Add Nurse</button>
+        <!-- <button class="btn btn-primary mb-3" (click)="showAddCategoryModal()">Add Category</button> -->
+
+        <div class="mb-3">
+          <!-- <input type="text" class="form-control" placeholder="Search by First Name" [(ngModel)]="searchQuery" (input)="filterAdmins()"> -->
+        </div>
+        <table
+            [hover]="true"
+            [responsive]="true"
+            [striped]="true"
+            align="middle"
+            cTable
+            class="mb-0 border"
+        >
+            <thead class="text-nowrap text-truncate">
+            <tr>
+                <th class="bg-body-tertiary text-center "></th>
+                <th class="bg-body-tertiary">First Name</th>
+                <th class="bg-body-tertiary">Last Name</th>
+                <th class="bg-body-tertiary">phoneNumber</th>
+                <th class="bg-body-tertiary ">specialization</th>
+                <th class="bg-body-tertiary text-center">governorate</th>
+                <th class="bg-body-tertiary text-center">city</th>
+                <th class="bg-body-tertiary text-center">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+
+                <tr *ngFor="let nurse of Nurse">
+                    <td class="text-center">
+                        <c-avatar [size]="'md'" [src]="nurse.imageUrl" status="success"></c-avatar>
+                    </td>
+                    <td>{{ nurse.firstName }}</td>
+                    <td>{{ nurse.lastName }}</td>
+                    <td>{{ nurse.phoneNumber }}</td>
+                    <td>{{ nurse.specialization }}</td>
+                    <td>{{ nurse.governorate }}</td>
+                    <td>{{ nurse.city }}</td>
+                    <!-- <td>{{ category.descriptionEn }}</td>
+                    <td>{{ category.descriptionAr }}</td> -->
+                    <td class="text-center">
+                      <button class="btn btn-danger btn-sm me-1" (click)="toggleComfirm(nurse)"  >Delete</button>
+                      <!-- <button class="btn btn-primary btn-sm me-1" (click)="showEditCategoryModal(category)">Edit</button>
+                       <button class="btn btn-secondary btn-sm" (click)="ShowsubCategory(category.id)">Show SubCategory</button> -->
+                    </td>
+                  </tr>
+            
+            </tbody>
+        </table>
+       
+        </c-card-body>
+    </c-card>
+    </c-col>
+</c-row>
+
+<!-- (visibleChange)="handleAddModalChange($event)" -->
+<ng-container *ngIf="AddModalVisible">
+  <ng-container *ngTemplateOutlet="AddModal"></ng-container>
+</ng-container>
+<ng-template #AddModal>
+     <c-modal id="addCategoryModal" [visible]="AddModalVisible" >
+      <form [formGroup]="nurseForm" (ngSubmit)="onSubmit()">
+        <c-modal-header>
+          <h5 cModalTitle>Add Nurse</h5>
+        </c-modal-header>
+        <c-modal-body>
+             <!-- First Name -->
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input id="firstName" formControlName="firstName" class="form-control" />
+          <div *ngIf="nurseForm.get('firstName')?.invalid && nurseForm.get('firstName')?.touched" class="text-danger">
+            First name is required.
+          </div>
+        </div>
+      
+        <!-- Last Name -->
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input id="lastName" formControlName="lastName" class="form-control" />
+          <div *ngIf="nurseForm.get('lastName')?.invalid && nurseForm.get('lastName')?.touched" class="text-danger">
+            Last name is required.
+          </div>
+        </div>
+      
+        <!-- Phone Number -->
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number</label>
+          <input id="phoneNumber" formControlName="phoneNumber" class="form-control" />
+          <div *ngIf="nurseForm.get('phoneNumber')?.hasError('pattern') && nurseForm.get('phoneNumber')?.touched" class="text-danger">
+            Invalid phone number.
+          </div>
+          <div *ngIf="nurseForm.get('phoneNumber')?.hasError('required') && nurseForm.get('phoneNumber')?.touched" class="text-danger">
+            Phone number is required.
+          </div>
+        </div>
+      
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" formControlName="password" class="form-control" type="password" />
+          <div *ngIf="nurseForm.get('password')?.hasError('required') && nurseForm.get('password')?.touched" class="text-danger">
+            Password is required.
+          </div>
+          <div *ngIf="nurseForm.get('password')?.hasError('minlength') && nurseForm.get('password')?.touched" class="text-danger">
+            Password must be at least 6 characters long.
+          </div>
+        </div>
+      
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input id="confirmPassword" formControlName="confirmPassword" class="form-control" type="password" />
+          <div *ngIf="nurseForm.hasError('passwordMismatch') && nurseForm.get('confirmPassword')?.touched" class="text-danger">
+            Passwords do not match.
+          </div>
+        </div>
+      
+        <!-- City, Governorate, and Specialty -->
+        <div class="form-group">
+          <label for="cityId">City</label>
+          <select id="cityId" formControlName="cityId" class="form-control">
+            <option [ngValue]="0">Select City</option>
+            <option *ngFor="let city of cities" [ngValue]="city.id">{{ city.nameAr }}</option>
+          </select>
+          <div *ngIf="nurseForm.get('cityId')?.invalid && nurseForm.get('cityId')?.touched" class="text-danger">
+            City is required.
+          </div>
+        </div>
+      
+        <div class="form-group">
+          <label for="governorateId">Governorate</label>
+          <select id="governorateId" formControlName="governorateId" class="form-control">
+            <option [ngValue]="0">Select Governorate</option>
+            <option *ngFor="let governorate of governorates" [ngValue]="governorate.id">{{ governorate.nameAr }}</option>
+          </select>
+          <div *ngIf="nurseForm.get('governorateId')?.invalid && nurseForm.get('governorateId')?.touched" class="text-danger">
+            Governorate is required.
+          </div>
+        </div>
+      
+        <div class="form-group">
+          <label for="specialtyId">Specialty</label>
+          <select id="specialtyId" formControlName="specialtyId" class="form-control">
+            <option [ngValue]="0">Select Specialty</option>
+            <option *ngFor="let specialty of specialties" [ngValue]="specialty.id">{{ specialty.nameAr }}</option>
+          </select>
+          <div *ngIf="nurseForm.get('specialtyId')?.invalid && nurseForm.get('specialtyId')?.touched" class="text-danger">
+            Specialty is required.
+          </div>
+        </div>
+      
+        <!-- Latitude and Longitude -->
+        <!-- <div class="form-group">
+          <label for="latitude">Latitude</label>
+          <input id="latitude" formControlName="latitude" class="form-control" />
+          <div *ngIf="nurseForm.get('latitude')?.invalid && nurseForm.get('latitude')?.touched" class="text-danger">
+            Invalid latitude value.
+          </div>
+        </div> -->
+<!--       
+        <div class="form-group">
+          <label for="longitude">Longitude</label>
+          <input id="longitude" formControlName="longitude" class="form-control" />
+          <div *ngIf="nurseForm.get('longitude')?.invalid && nurseForm.get('longitude')?.touched" class="text-danger">
+            Invalid longitude value.
+          </div>
+        </div> -->
+      
+        <!-- Medical License and Profile Picture -->
+        <div class="form-group">
+          <label for="medicalLicense">Medical License</label>
+          <input type="text" id="medicalLicense" formControlName="medicalLicense"   class="form-control" />
+          <div *ngIf="nurseForm.get('medicalLicense')?.invalid && nurseForm.get('medicalLicense')?.touched" class="text-danger">
+            Medical license is required.
+          </div>
+        </div>
+      
+        <div class="form-group">
+          <label for="profilePicture">Profile Picture</label>
+          <input type="file" id="profilePicture" (change)="onFileChange($event)" class="form-control" />
+          <div *ngIf="nurseForm.get('profilePicture')?.invalid && nurseForm.get('profilePicture')?.touched" class="text-danger">
+            Profile picture is required.
+          </div>
+        </div>
+      
+        <!-- Submit Button -->
+         </c-modal-body>
+        <c-modal-footer>
+          <button type="button" class="btn btn-secondary" (click)="ShowAddNurse()" cButton color="secondary">
+            Close
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="nurseForm.invalid  ">Save changes</button>
+        </c-modal-footer>
+      </form>
+      
+      
+
+    </c-modal>
+    
+  </ng-template>
+
+
+  <ng-container *ngIf="DeleteModalVisible">
+    <ng-container *ngTemplateOutlet="ComfirmDeleteModal"></ng-container>
+
+ </ng-container>
+ <ng-template #ComfirmDeleteModal>
+      <c-modal id="confirmDeleteModal" [visible]="DeleteModalVisible" (visibleChange)="handleDeleteModalChange($event)">
+  
+       <c-modal-header>
+         <h5 cModalTitle>Confirm Delete</h5>
+        </c-modal-header>
+       <c-modal-body>
+ 
+         Are you sure you want to delete <strong>{{ selectedNures?.FirstName }}</strong>?
+         
+       </c-modal-body>
+       <c-modal-footer>
+         <button  class="btn btn-secondary" (click)="closeComfirm()" cButton color="secondary">
+           Close
+         </button>
+         <button type="button" class="btn btn-danger" (click)="confirmDelete()"    >Delete</button>
+ 
+         <!-- <button class="btn btn-primary" cButton color="primary"></button> -->
+       </c-modal-footer>
+  
+     </c-modal>
+     
+
+
+   </ng-template>
