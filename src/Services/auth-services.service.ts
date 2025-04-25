@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class AuthServicesService {
-  private baseUrl ="http://procare.runasp.net"// environment.API_URL; // Use API_URL from environment
+  private baseUrl ="https://procare.runasp.net"// environment.API_URL; // Use API_URL from environment
 
   constructor(private httpClient: HttpClient) {}
 

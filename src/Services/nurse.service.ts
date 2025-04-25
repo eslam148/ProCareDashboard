@@ -8,7 +8,7 @@ import { environment } from '../environments/environment';
   providedIn: 'root'
 })
 export class NurseService {
-  private baseUrl = "http://procare.runasp.net"//environment.API_URL; 
+  private baseUrl = "https://procare.runasp.net"//environment.API_URL; 
   constructor(private http: HttpClient) { }
   
   getNurses(pageNumber: number, pageSize: number, searchKey: string) {

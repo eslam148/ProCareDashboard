@@ -9,7 +9,7 @@ import { AddSubCategoryRequest, Category, SubCategoryRequest } from '../app/Mode
 })
 export class CategoryService {
 
-    private baseUrl ="http://procare.runasp.net" // environment.API_URL; // Use API_URL from environment
+    private baseUrl ="https://procare.runasp.net" // environment.API_URL; // Use API_URL from environment
 
   constructor(private http: HttpClient) { }
 

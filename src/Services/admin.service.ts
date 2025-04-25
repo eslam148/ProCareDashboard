@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AdminService {
-    private baseUrl = "http://procare.runasp.net"//environment.API_URL; // Use API_URL from environment
+    private baseUrl = "https://procare.runasp.net"//environment.API_URL; // Use API_URL from environment
   constructor(private http: HttpClient) { }
 
   getAllAdmins(pageNumber: number, pageSize: number, searchKey: string) {
