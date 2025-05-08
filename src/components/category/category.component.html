@@ -1,168 +1,141 @@
- 
-     <c-row>
-        <c-col xs>
-        <c-card class="mb-4">
-            <c-card-body> 
-              <!-- <button (click)="toggleLiveDemo()" cButton>Launch demo modal</button> -->
+<div *ngIf="isLoading" class="loading-overlay">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
 
-            <button class="btn btn-primary mb-3" (click)="toggleLiveDemo()">Add Category</button>
-            <!-- <button class="btn btn-primary mb-3" (click)="showAddCategoryModal()">Add Category</button> -->
+<c-row>
+  <c-col xs>
+    <c-card class="mb-4 shadow-sm">
+      <c-card-body>
+        <button class="btn btn-primary mb-3" (click)="showAddCategoryModal()" [disabled]="isLoading">Add Category</button>
+        <div class="table-responsive">
+          <table
+            [hover]="true"
+            [responsive]="true"
+            [striped]="true"
+            align="middle"
+            cTable
+            class="table table-bordered table-hover text-center"
+          >
+            <thead class="table-light">
+              <tr>
+                <th></th>
+                <th>Name</th>
+                <th>الاسم</th>
+                <th>Description (EN)</th>
+                <th>الوصف</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let category of categories.data">
+                <td>
+                  <c-avatar [size]="'md'" [src]="category.iconUrl" status="success"></c-avatar>
+                </td>
+                <td>{{ category.nameEn }}</td>
+                <td>{{ category.nameAr }}</td>
+                <td>{{ category.descriptionEn }}</td>
+                <td>{{ category.descriptionAr }}</td>
+                <td>
+                  <button class="btn btn-danger btn-sm me-1" (click)="toggleComfirm(category)" [disabled]="isLoading">Delete</button>
+                  <button class="btn btn-primary btn-sm me-1" (click)="showEditCategoryModal(category)" [disabled]="isLoading">Edit</button>
+                  <button class="btn btn-secondary btn-sm me-1" (click)="ShowAddSubCategory(category)" [disabled]="isLoading">Add SubCategory</button>
+                  <button class="btn btn-info btn-sm" (click)="ShowsubCategory(category.id)" [disabled]="isLoading">Show SubCategory</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
 
-            <div class="mb-3">
-              <!-- <input type="text" class="form-control" placeholder="Search by First Name" [(ngModel)]="searchQuery" (input)="filterAdmins()"> -->
-            </div>
-            <table
-                [hover]="true"
-                [responsive]="true"
-                [striped]="true"
-                align="middle"
-                cTable
-                class="mb-0 border"
-            >
-                <thead class="text-nowrap text-truncate">
-                <tr>
-                    <th class="bg-body-tertiary text-center "></th>
-                    <th class="bg-body-tertiary">Name</th>
-                    <th class="bg-body-tertiary">الاسم</th>
-                    <th class="bg-body-tertiary">descriptionA</th>
-                    <th class="bg-body-tertiary ">الوصف</th>
-                    <th class="bg-body-tertiary text-center">ِAction</th>
+<ng-container *ngIf="AddModalVisible">
+  <ng-container *ngTemplateOutlet="AddModal"></ng-container>
+</ng-container>
+<ng-template #AddModal>
+  <c-modal id="addCategoryModal" [visible]="AddModalVisible" (visibleChange)="handleAddModalChange($event)">
+    <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
+      <c-modal-header>
+        <h5 cModalTitle class="text-primary">Add Category</h5>
+      </c-modal-header>
+      <c-modal-body>
+        <div class="mb-3">
+          <label for="nameAr" class="form-label">Name (Arabic)</label>
+          <input type="text" id="nameAr" class="form-control" formControlName="nameAr">
+          <div *ngIf="categoryForm.get('nameAr')?.invalid && categoryForm.get('nameAr')?.touched" class="text-danger">
+            Name in Arabic is required.
+          </div>
+        </div>
 
-                </tr>
-                </thead>
-                <tbody>
+        <div class="mb-3">
+          <label for="nameEn" class="form-label">Name (English)</label>
+          <input type="text" id="nameEn" class="form-control" formControlName="nameEn">
+          <div *ngIf="categoryForm.get('nameEn')?.invalid && categoryForm.get('nameEn')?.touched" class="text-danger">
+            Name in English is required.
+          </div>
+        </div>
 
-                    <tr *ngFor="let category of categories.data">
-                        <td class="text-center">
-                            <c-avatar [size]="'md'" [src]="category.iconUrl" status="success"></c-avatar>
-                        </td>
-                        <td>{{ category.nameEn }}</td>
-                        <td>{{ category.nameAr }}</td>
-                        <td>{{ category.descriptionEn }}</td>
-                        <td>{{ category.descriptionAr }}</td>
-                        <td class="text-center">
-                          <button class="btn btn-danger btn-sm me-1" (click)="toggleComfirm(category)">Delete</button>
-                          <button class="btn btn-primary btn-sm me-1" (click)="showEditCategoryModal(category)">Edit</button>
-                          <!-- <button class="btn btn-secondary btn-sm" (click)="ShowAddSubCategory()">Show SubCategory</button> -->
-                          <button class="btn btn-secondary btn-sm" (click)="ShowsubCategory(category.id)">Show SubCategory</button>
-                        </td>
-                      </tr>
-                
-                </tbody>
-            </table>
-           
-            </c-card-body>
-        </c-card>
-        </c-col>
-    </c-row>
+        <div class="mb-3">
+          <label for="descriptionAr" class="form-label">Description (Arabic)</label>
+          <textarea id="descriptionAr" class="form-control" formControlName="descriptionAr"></textarea>
+          <div *ngIf="categoryForm.get('descriptionAr')?.invalid && categoryForm.get('descriptionAr')?.touched" class="text-danger">
+            Description in Arabic is required.
+          </div>
+        </div>
 
+        <div class="mb-3">
+          <label for="descriptionEn" class="form-label">Description (English)</label>
+          <textarea id="descriptionEn" class="form-control" formControlName="descriptionEn"></textarea>
+          <div *ngIf="categoryForm.get('descriptionEn')?.invalid && categoryForm.get('descriptionEn')?.touched" class="text-danger">
+            Description in English is required.
+          </div>
+        </div>
 
-    <ng-container *ngIf="AddModalVisible">
-      <ng-container *ngTemplateOutlet="AddModal"></ng-container>
-    </ng-container>
-    <ng-template #AddModal>
-         <c-modal id="addCategoryModal" [visible]="AddModalVisible" (visibleChange)="handleAddModalChange($event)">
-          <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
-    
-          <c-modal-header>
-            <h5 cModalTitle>Add Category</h5>
-           </c-modal-header>
-          <c-modal-body>
-    
-              <div class="mb-3">
-                <label for="nameAr" class="form-label">Name (Arabic)</label>
-                <input type="text" id="nameAr" class="form-control" formControlName="nameAr">
-                <div *ngIf="categoryForm.get('nameAr')?.invalid && categoryForm.get('nameAr')?.touched" class="text-danger">
-                  Name in Arabic is required.
-                </div>
-              </div>
-    
-              <div class="mb-3">
-                <label for="nameEn" class="form-label">Name (English)</label>
-                <input type="text" id="nameEn" class="form-control" formControlName="nameEn">
-                <div *ngIf="categoryForm.get('nameEn')?.invalid && categoryForm.get('nameEn')?.touched" class="text-danger">
-                  Name in English is required.
-                </div>
-              </div>
-    
-              <div class="mb-3">
-                <label for="descriptionAr" class="form-label">Description (Arabic)</label>
-                <textarea id="descriptionAr" class="form-control" formControlName="descriptionAr"></textarea>
-                <div *ngIf="categoryForm.get('descriptionAr')?.invalid && categoryForm.get('descriptionAr')?.touched" class="text-danger">
-                  Description in Arabic is required.
-                </div>
-              </div>
-    
-              <div class="mb-3">
-                <label for="descriptionEn" class="form-label">Description (English)</label>
-                <textarea id="descriptionEn" class="form-control" formControlName="descriptionEn"></textarea>
-                <div *ngIf="categoryForm.get('descriptionEn')?.invalid && categoryForm.get('descriptionEn')?.touched" class="text-danger">
-                  Description in English is required.
-                </div>
-              </div>
-    
-              <div class="mb-3">
-                <label for="icon" class="form-label">Icon</label>
-                <input type="file" id="icon" class="form-control" (change)="onFileChange($event)">
-                <div *ngIf="fileError" class="text-danger">
-                  Icon is required.
-                </div>
-              </div>
-            
-          </c-modal-body>
-          <c-modal-footer>
-            <button  class="btn btn-secondary" (click)="toggleLiveDemo()" cButton color="secondary">
-              Close
-            </button>
-            <button type="submit" class="btn btn-primary" [disabled]="categoryForm.invalid || !selectedFile">Save changes</button>
-    
-           </c-modal-footer>
-        </form>
-    
-        </c-modal>
-        
-      </ng-template>
-  
- 
-  <ng-container *ngIf="DeleteModalVisible">
-     <ng-container *ngTemplateOutlet="ComfirmDeleteModal"></ng-container>
+        <div class="mb-3">
+          <label for="icon" class="form-label">Icon</label>
+          <input type="file" id="icon" class="form-control" (change)="onFileChange($event)">
+          <div *ngIf="fileError" class="text-danger">
+            Icon is required.
+          </div>
+        </div>
+      </c-modal-body>
+      <c-modal-footer>
+        <button class="btn btn-secondary" (click)="toggleLiveDemo()">Close</button>
+        <button type="submit" class="btn btn-primary" [disabled]="categoryForm.invalid || !selectedFile">Save changes</button>
+      </c-modal-footer>
+    </form>
+  </c-modal>
+</ng-template>
 
-  </ng-container>
-  <ng-template #ComfirmDeleteModal>
-       <c-modal id="confirmDeleteModal" [visible]="DeleteModalVisible" (visibleChange)="handleDeleteModalChange($event)">
-   
-        <c-modal-header>
-          <h5 cModalTitle>Confirm Delete</h5>
-         </c-modal-header>
-        <c-modal-body>
-  
-          Are you sure you want to delete <strong>{{ selectedCategory?.nameEn }}</strong>?
-          
-        </c-modal-body>
-        <c-modal-footer>
-          <button  class="btn btn-secondary" (click)="closeComfirm()" cButton color="secondary">
-            Close
-          </button>
-          <button type="button" class="btn btn-danger" (click)="confirmDelete()"    >Delete</button>
-  
-          <!-- <button class="btn btn-primary" cButton color="primary"></button> -->
-        </c-modal-footer>
-   
-      </c-modal>
-      
+<ng-container *ngIf="DeleteModalVisible">
+  <ng-container *ngTemplateOutlet="ComfirmDeleteModal"></ng-container>
+</ng-container>
+<ng-template #ComfirmDeleteModal>
+  <c-modal id="confirmDeleteModal" [visible]="DeleteModalVisible" (visibleChange)="handleDeleteModalChange($event)">
+    <c-modal-header>
+      <h5 cModalTitle class="text-danger">Confirm Delete</h5>
+    </c-modal-header>
+    <c-modal-body>
+      Are you sure you want to delete <strong>{{ selectedCategory?.nameEn }}</strong>?
+    </c-modal-body>
+    <c-modal-footer>
+      <button class="btn btn-secondary" (click)="closeComfirm()">Close</button>
+      <button type="button" class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+    </c-modal-footer>
+  </c-modal>
+</ng-template>
 
-
-    </ng-template>
-    
 <ng-container *ngIf="EditModalVisible">
   <ng-container *ngTemplateOutlet="EditModal"></ng-container>
-
 </ng-container>
 <ng-template #EditModal>
-  <c-modal id="editCategoryModal" [visible]="EditModalVisible"  >
+  <c-modal id="editCategoryModal" [visible]="EditModalVisible">
     <form [formGroup]="categoryForm" (ngSubmit)="onSubmitEdit()">
       <c-modal-header>
-        <h5 cModalTitle>Edit Category</h5>
+        <h5 cModalTitle class="text-primary">Edit Category</h5>
       </c-modal-header>
       <c-modal-body>
         <div class="mb-3">
@@ -181,6 +154,13 @@
           <label for="descriptionEn" class="form-label">Description (English)</label>
           <textarea id="descriptionEn" class="form-control" formControlName="descriptionEn"></textarea>
         </div>
+        <div class="mb-3">
+          <label for="icon" class="form-label">Icon</label>
+          <input type="file" id="icon" class="form-control" (change)="onFileChange($event)">
+          <div *ngIf="fileError" class="text-danger">
+            Icon is required.
+          </div>
+        </div>
       </c-modal-body>
       <c-modal-footer>
         <button class="btn btn-secondary" (click)="closeEditCategoryModal()">Close</button>
@@ -195,9 +175,9 @@
 </ng-container>
 <ng-template #AddSubCategoryModal>
   <c-modal id="addSubCategoryModal" [visible]="AddSubModalVisible" (visibleChange)="handleAddSubCategoryModalChange($event)">
-    <form [formGroup]="subCategoryForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
+    <form [formGroup]="subCategoryForm" (ngSubmit)="onAddSubCategorySubmit()" enctype="multipart/form-data">
       <c-modal-header>
-        <h5 cModalTitle>Add SubCategory</h5>
+        <h5 cModalTitle class="text-primary">Add SubCategory</h5>
       </c-modal-header>
       <c-modal-body>
         <div class="mb-3">
@@ -252,83 +232,141 @@
   <ng-container *ngTemplateOutlet="SubCategoryModal"></ng-container>
 </ng-container>
 <ng-template #SubCategoryModal>
-  <c-modal #modalLg id="modalLg" size="lg" id="subCategoryModal" [visible]="ShowSubCategoryModalVisible" (visibleChange)="handleSubCategoryModalChange($event)">
+  <c-modal 
+    #modalLg 
+    id="modalLg" 
+    size="xl"
+    [scrollable]="true"
+    id="subCategoryModal" 
+    [visible]="ShowSubCategoryModalVisible" 
+    (visibleChange)="handleSubCategoryModalChange($event)"
+  >
     <c-modal-header>
-      <h5 cModalTitle>SubCategory</h5>
+      <h5 cModalTitle class="text-primary">SubCategory</h5>
     </c-modal-header>
     <c-modal-body>
-      <table
-      [hover]="true"
-      [responsive]="true"
-      [striped]="true"
-      align="middle"
-      cTable
-      class="mb-0 border"
-  >
-      <thead class="text-nowrap text-truncate">
-      <tr>
-          <th class="bg-body-tertiary text-center "></th>
-          <th class="bg-body-tertiary">Name</th>
-          <th class="bg-body-tertiary">الاسم</th>
-          <th class="bg-body-tertiary">descriptionA</th>
-          <th class="bg-body-tertiary ">الوصف</th>
-          <th class="bg-body-tertiary text-center">ِAction</th>
-
-      </tr>
-      </thead>
-      <tbody>
-
-          <tr *ngFor="let subcategory of SubCategory.data">
-              <td class="text-center">
-                  <c-avatar [size]="'md'" [src]="subcategory.iconUrl" status="success"></c-avatar>
+      <div class="table-responsive">
+        <table
+          [hover]="true"
+          [responsive]="true"
+          [striped]="true"
+          align="middle"
+          cTable
+          class="table table-bordered table-hover text-center"
+        >
+          <thead class="table-light">
+            <tr>
+              <th></th>
+              <th>Name</th>
+              <th>الاسم</th>
+              <th>Description (EN)</th>
+              <th>الوصف</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let subcategory of SubCategory.data">
+              <td>
+                <c-avatar 
+                  [size]="'md'" 
+                  [src]="subcategory.iconUrl" 
+                  status="success"
+                ></c-avatar>
               </td>
               <td>{{ subcategory.nameEn }}</td>
               <td>{{ subcategory.nameAr }}</td>
               <td>{{ subcategory.descriptionEn }}</td>
               <td>{{ subcategory.descriptionAr }}</td>
-              <td class="text-center">
-                <button class="btn btn-danger btn-sm me-1" (click)="toggleSubCategoryComfirm(subcategory)">Delete</button>
-                <!-- <button class="btn btn-primary btn-sm me-1" (click)="showEditCategoryModal(subcategory)">Edit</button> -->
-                <!-- <button class="btn btn-secondary btn-sm" (click)="ShowAddSubCategory()">Show SubCategory</button> -->
-               </td>
+              <td>
+                <button 
+                  class="btn btn-danger btn-sm me-1" 
+                  (click)="toggleSubCategoryComfirm(subcategory)"
+                  [disabled]="isLoading"
+                >
+                  Delete
+                </button>
+                <button 
+                  class="btn btn-primary btn-sm me-1" 
+                  (click)="showEditSubCategoryModal(subcategory)"
+                  [disabled]="isLoading"
+                >
+                  Edit
+                </button>
+              </td>
             </tr>
-      
-      </tbody>
-  </table>
-     </c-modal-body>
+          </tbody>
+        </table>
+      </div>
+    </c-modal-body>
     <c-modal-footer>
-      <button class="btn btn-secondary" (click)="closeSubCategoryModal()">Close</button>
+      <button 
+        class="btn btn-secondary" 
+        (click)="closeSubCategoryModal()"
+      >
+        Close
+      </button>
     </c-modal-footer>
   </c-modal>
 </ng-template>
 
-
 <ng-container *ngIf="SubCategoryDeleteModalVisible">
   <ng-container *ngTemplateOutlet="SubCategoryDelete"></ng-container>
-
 </ng-container>
 <ng-template #SubCategoryDelete>
-    <c-modal id="confirmDeleteModal" [visible]="SubCategoryDeleteModalVisible" (visibleChange)="handleDeleteModalChange($event)">
+  <c-modal id="confirmDeleteModal" [visible]="SubCategoryDeleteModalVisible" (visibleChange)="handleDeleteModalChange($event)">
+    <c-modal-header>
+      <h5 cModalTitle class="text-danger">Confirm Delete</h5>
+    </c-modal-header>
+    <c-modal-body>
+      <p>Are you sure you want to delete <strong>{{ selectedSubCategory?.nameEn }}</strong>?</p>
+    </c-modal-body>
+    <c-modal-footer>
+      <button class="btn btn-secondary" (click)="closeSubCategoryComfirm()">Close</button>
+      <button type="button" class="btn btn-danger" (click)="confirmSubCategoryDelete()">Delete</button>
+    </c-modal-footer>
+  </c-modal>
+</ng-template>
 
-     <c-modal-header>
-       <h5 cModalTitle>Confirm Delete</h5>
+<ng-container *ngIf="EditSubCategoryModalVisible">
+  <ng-container *ngTemplateOutlet="EditSubCategoryModal"></ng-container>
+</ng-container>
+<ng-template #EditSubCategoryModal>
+  <c-modal id="editCategoryModal" [visible]="EditSubCategoryModalVisible">
+    <form [formGroup]="subCategoryForm" (ngSubmit)="onEditSubCategorySubmit()">
+      <c-modal-header>
+        <h5 cModalTitle class="text-primary">Edit SubCategory</h5>
       </c-modal-header>
-     <c-modal-body>
-
-       Are you sure you want to delete <strong>{{ selectedSubCategory?.nameEn }}</strong>?
-       
-     </c-modal-body>
-     <c-modal-footer>
-       <button  class="btn btn-secondary" (click)="closeSubCategoryComfirm()" cButton color="secondary">
-         Close
-       </button>
-       <button type="button" class="btn btn-danger" (click)="confirmSubCategoryDelete()"    >Delete</button>
-
+      <c-modal-body>
+        <div class="mb-3">
+          <label for="nameAr" class="form-label">Name (Arabic)</label>
+          <input type="text" id="nameAr" class="form-control" formControlName="nameAr">
+        </div>
+        <div class="mb-3">
+          <label for="nameEn" class="form-label">Name (English)</label>
+          <input type="text" id="nameEn" class="form-control" formControlName="nameEn">
+        </div>
+        <div class="mb-3">
+          <label for="descriptionAr" class="form-label">Description (Arabic)</label>
+          <textarea id="descriptionAr" class="form-control" formControlName="descriptionAr"></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="descriptionEn" class="form-label">Description (English)</label>
+          <textarea id="descriptionEn" class="form-control" formControlName="descriptionEn"></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="icon" class="form-label">Icon</label>
+          <input type="file" id="icon" class="form-control" (change)="onFileChange($event)">
+          <div *ngIf="fileError" class="text-danger">
+            Icon is required.
+          </div>
+        </div>
+      </c-modal-body>
+      <c-modal-footer>
+        <button class="btn btn-secondary" (click)="closeEditSubCategoryModal()">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
       </c-modal-footer>
+    </form>
+  </c-modal>
+</ng-template>
 
-   </c-modal>
-   
 
-
- </ng-template>
- 

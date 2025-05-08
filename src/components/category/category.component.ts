@@ -22,7 +22,7 @@ import {
 } from '@coreui/angular';
 
  import { AddSubCategoryRequest, Category, SubCategoryRequest } from '../../app/Model/Category';
- 
+  
 @Component({
   selector: 'app-category',
   standalone: true,
@@ -35,6 +35,7 @@ export class CategoryComponent implements OnInit {
   isAddCategoryModalVisible: boolean = false;
   isAddSubcategoryModalVisible: boolean = false;
   newCategory: { name: string } = { name: '' };
+  isLoading: boolean = false;
   newSubcategory: { name: string; parentCategoryId: number | null } = { name: '', parentCategoryId: null };
   public AddModalVisible = false;
   public AddSubModalVisible = false;
@@ -43,13 +44,13 @@ export class CategoryComponent implements OnInit {
   public EditModalVisible = false;
   public ShowSubCategoryModalVisible = false;
   public SubCategoryDeleteModalVisible = false;
+  public EditSubCategoryModalVisible = false;
   categoryForm: FormGroup;
   subCategoryForm: FormGroup;
   selectedFile: File | null = null;
   fileError: boolean = false;
   selectedCategory: Category | null = null;
   selectedSubCategory: SubCategoryRequest | null = null;
-
   SubCategory:  { data: SubCategoryRequest[] } = { data: [] };
 
   constructor(private categoryService: CategoryService, private fb: FormBuilder, private http: HttpClient, private cdr: ChangeDetectorRef) {
@@ -288,8 +289,10 @@ export class CategoryComponent implements OnInit {
     );
   }
 
-  ShowAddSubCategory(): void {
+  ShowAddSubCategory(selectedCategory:Category): void {
+    console.log('Selected category:', selectedCategory); // Log the selected category
     this.AddSubModalVisible = true;
+    this.selectedCategory = selectedCategory; // Set the selected category
     this.cdr.detectChanges(); // Notify Angular of the change
   }
 
@@ -305,7 +308,6 @@ export class CategoryComponent implements OnInit {
   
   ShowsubCategory(id:number): void {
     console.log('Subcategory ID:', id); // Log the ID of the selected category
-
     this.ShowSubCategoryModalVisible = true;
     this.categoryService.getAllSubCategories(id).subscribe(
       (data) => {
@@ -316,6 +318,9 @@ export class CategoryComponent implements OnInit {
         }
         this.SubCategory = data;
         console.log('Subcategories fetched successfully:', data);
+        this.selectedCategory = this.categories.data.find(cat => cat.id === id) || null; // Find the selected category from the list
+
+        console.log('Selected category form show:', this.selectedCategory); // Log the selected category
         
       },
       (error) => {
@@ -364,6 +369,88 @@ export class CategoryComponent implements OnInit {
     }
   }
 
+  onAddSubCategorySubmit(){
+    if (this.subCategoryForm.invalid) {
+      return;
+    }
+    if (this.subCategoryForm.invalid || !this.selectedFile) {
+      this.fileError = !this.selectedFile;
+      return;
+    }    const formData = new FormData();
+   
+    formData.append('NameAr', this.subCategoryForm.get('nameAr')?.value);
+    formData.append('NameEn', this.subCategoryForm.get('nameEn')?.value);
+    formData.append('DescriptionAr', this.subCategoryForm.get('descriptionAr')?.value);
+    formData.append('DescriptionEn', this.subCategoryForm.get('descriptionEn')?.value);
+    formData.append('ServiceCategoryId', this.selectedCategory?.id.toString() || '');
+    formData.append('Icon', this.selectedFile);
 
-  
+    this.categoryService.addSubCategory(formData).subscribe(
+      (response) => {
+        console.log('Subcategory added successfully:', response);
+        this.SubCategory.data.push(response.data); // Add the new subcategory to the list
+        this.subCategoryForm.reset();
+        this.AddSubModalVisible = false; // Close the modal
+      },
+      (error) => {
+        console.error('Error adding subcategory:', error);
+      }
+    );
+  }
+  showEditSubCategoryModal(subcategory: SubCategoryRequest): void {
+     this.selectedSubCategory = subcategory;
+    console.log('Selected subcategory for edit:', this.selectedSubCategory);
+    this.EditSubCategoryModalVisible = !this.EditSubCategoryModalVisible;
+    this.subCategoryForm.patchValue({
+      nameAr: subcategory.nameAr,
+      nameEn: subcategory.nameEn,
+      descriptionAr: subcategory.descriptionAr,
+      descriptionEn: subcategory.descriptionEn
+    });
+    console.log('Selected subcategory for edit:', this.selectedCategory);
+    console.log('Subcategory name:',this.EditSubCategoryModalVisible);
+
+    this.cdr.detectChanges(); // Notify Angular of the change
+   }
+   
+   closeEditSubCategoryModal(): void {
+    console.log('SubCategory comfirm:',this.EditSubCategoryModalVisible);
+    this.EditSubCategoryModalVisible = false;
+    this.selectedSubCategory = null;
+    this.cdr.detectChanges(); // Notify Angular of the change
+    }
+
+
+    onEditSubCategorySubmit(){
+      if (this.subCategoryForm.invalid) {
+        return;
+      }
+      if (this.subCategoryForm.invalid || !this.selectedFile) {
+        this.fileError = !this.selectedFile;
+        return;
+      }    const formData = new FormData();
+     const subcategoryId = this.selectedSubCategory?.id;
+     const  categoryId = this.selectedCategory?.id;
+      console.log('Selected  category ID:',this.selectedCategory); // Log the selected subcategory ID
+      formData.append('NameAr', this.subCategoryForm.get('nameAr')?.value);
+      formData.append('NameEn', this.subCategoryForm.get('nameEn')?.value);
+      formData.append('DescriptionAr', this.subCategoryForm.get('descriptionAr')?.value);
+      formData.append('DescriptionEn', this.subCategoryForm.get('descriptionEn')?.value);
+      formData.append('ServiceCategoryId',  `${categoryId}` );
+      formData.append('Id',  `${subcategoryId}` );
+
+      formData.append('Icon', this.selectedFile);
+  console.log('Selected subcategory ID:',subcategoryId); // Log the selected subcategory ID
+      this.categoryService.updateSubCategory(formData).subscribe(
+        (response) => {
+          console.log('Subcategory added successfully:', response);
+          this.SubCategory.data.push(response.data); // Add the new subcategory to the list
+          this.subCategoryForm.reset();
+          this.EditSubCategoryModalVisible = false; // Close the modal
+        },
+        (error) => {
+          console.error('Error adding subcategory:', error);
+        }
+      );
+    }
 }

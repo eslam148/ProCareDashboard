@@ -8,7 +8,7 @@ import { GeneralResponse } from '../app/Model/GeneralResponse';
   providedIn: 'root'
 })
 export class AddressService {
-    private baseUrl ="https://procare.runasp.net" //environment.API_URL; // Use API_URL from environment
+    private baseUrl ="http://procare.runasp.net" //environment.API_URL; // Use API_URL from environment
    constructor(private http: HttpClient) { }
     getCities() :Observable<GeneralResponse<City[]>> {
       return this.http.get<GeneralResponse<City[]>>(`${this.baseUrl}/api/City/GetAllCities`);

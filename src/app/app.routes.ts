@@ -91,6 +91,12 @@ export const routes: Routes = [
           import('../components/add-nures/add-nures.component').then((m) => m.AddNuresComponent),
         canActivate: [authGuard]  // Apply the authGuard to the lazy-loaded route
       },
+      {
+        path: 'Location',
+        loadComponent: () =>
+          import('../components/location/location.component').then((m) => m.LocationComponent),
+        canActivate: [authGuard]   
+      },
     ]
   },
   {

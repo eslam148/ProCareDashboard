@@ -1,7 +1,7 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-
+import { RouterLink,  RouterLinkActive } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   AvatarComponent,
   BadgeComponent,
@@ -23,6 +23,7 @@ import {
 } from '@coreui/angular';
 
 import { IconDirective } from '@coreui/icons-angular';
+import { AuthServicesService } from '../../../../Services/auth-services.service';
 
 @Component({
     selector: 'app-default-header',
@@ -45,7 +46,7 @@ export class DefaultHeaderComponent extends HeaderComponent {
     return this.colorModes.find(mode => mode.name === currentMode)?.icon ?? 'cilSun';
   });
 
-  constructor() {
+  constructor(private router: Router, private authService: AuthServicesService) {
     super();
   }
 
@@ -125,5 +126,8 @@ export class DefaultHeaderComponent extends HeaderComponent {
     { id: 3, title: 'Add new layouts', value: 75, color: 'info' },
     { id: 4, title: 'Angular Version', value: 100, color: 'success' }
   ];
-
+  onLogout(): void {
+    this.authService.logout(); // Call the logout method from your AuthService
+    this.router.navigate(['/login']); // Redirect to the login page
+  }
 }

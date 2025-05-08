@@ -34,6 +34,12 @@ export const navItems: INavData[] = [
      
   },
   {
+    name: 'Location',
+    url: '/Location',
+    iconComponent: { name: 'cil-speedometer' }
+     
+  },
+  {
     name: 'Dashboard',
     url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },

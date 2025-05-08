@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class AuthServicesService {
-  private baseUrl ="https://procare.runasp.net"// environment.API_URL; // Use API_URL from environment
+  private baseUrl ="http://procare.runasp.net"// environment.API_URL; // Use API_URL from environment
 
   constructor(private httpClient: HttpClient) {}
 
@@ -17,7 +17,8 @@ export class AuthServicesService {
   }
 
   logout() {
-    return this.httpClient.post(`${this.baseUrl}/api/auth/logout`, {}); // Use baseUrl
+    localStorage.removeItem('authToken'); // Remove token from local storage
+    
   }
 
   isAuthenticated(): boolean {

@@ -9,20 +9,19 @@ import { AddSubCategoryRequest, Category, SubCategoryRequest } from '../app/Mode
 })
 export class CategoryService {
 
-    private baseUrl ="https://procare.runasp.net" // environment.API_URL; // Use API_URL from environment
+    private baseUrl ="http://procare.runasp.net" // environment.API_URL; // Use API_URL from environment
 
   constructor(private http: HttpClient) { }
-
-  getAllCategories(): Observable<GeneralResponse<Category[]>> {
+   getAllCategories(): Observable<GeneralResponse<Category[]>> {
    
     return this.http.get<GeneralResponse<Category[]>>(this.baseUrl + '/api/ServiceCategory/GetAllCategories');
   }
 
   addCategory(formData: FormData): Observable<any> {
     const headers = new HttpHeaders();
-    headers.append('Accept', '*/*');
-
-    return this.http.post<GeneralResponse<Category>>(
+    headers.append('Accept', '/*');
+    headers.append('Content-Type', 'multipart/form-data');
+     return this.http.post<GeneralResponse<Category>>(
       `${this.baseUrl}/api/ServiceCategory/AddCategory`,
       formData,
       { headers }
@@ -53,6 +52,28 @@ export class CategoryService {
   deleteSubCategory(id: number): Observable<any> {
     return this.http.delete<GeneralResponse<SubCategoryRequest>>(
       `${this.baseUrl}/api/SubCategory/DeleteSubCategory/${id}`
+    );
+  }
+
+  addSubCategory(formData: FormData): Observable<any> {
+    const headers = new HttpHeaders();
+    headers.append('Accept', '/*');
+    headers.append('Content-Type', 'multipart/form-data');
+     return this.http.post<GeneralResponse<SubCategoryRequest>>(
+      `${this.baseUrl}/api/SubCategory/AddSubCategory`,
+      formData,
+      { headers }
+    );
+  }
+  updateSubCategory(formData: FormData): Observable<any> {
+    console.log(formData.get('descriptionAr'));
+    const headers = new HttpHeaders();
+    headers.append('Accept', '/*');
+    headers.append('Content-Type', 'multipart/form-data');
+     return this.http.put<GeneralResponse<SubCategoryRequest>>(
+      `${this.baseUrl}/api/SubCategory/updateSubCategory`,
+      formData,
+      { headers }
     );
   }
 }
