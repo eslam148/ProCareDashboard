@@ -1,372 +1,443 @@
-<div *ngIf="isLoading" class="loading-overlay">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading...</span>
+<div class="loading-overlay" *ngIf="isLoading">
+  <div class="loading-spinner">
+    <c-spinner color="primary" size="sm"></c-spinner>
+    <p>{{ loadingMessage }}</p>
   </div>
 </div>
 
-<c-row>
-  <c-col xs>
-    <c-card class="mb-4 shadow-sm">
-      <c-card-body>
-        <button class="btn btn-primary mb-3" (click)="showAddCategoryModal()" [disabled]="isLoading">Add Category</button>
-        <div class="table-responsive">
-          <table
-            [hover]="true"
-            [responsive]="true"
-            [striped]="true"
-            align="middle"
-            cTable
-            class="table table-bordered table-hover text-center"
-          >
-            <thead class="table-light">
-              <tr>
-                <th></th>
-                <th>Name</th>
-                <th>الاسم</th>
-                <th>Description (EN)</th>
-                <th>الوصف</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let category of categories.data">
-                <td>
-                  <c-avatar [size]="'md'" [src]="category.iconUrl" status="success"></c-avatar>
-                </td>
-                <td>{{ category.nameEn }}</td>
-                <td>{{ category.nameAr }}</td>
-                <td>{{ category.descriptionEn }}</td>
-                <td>{{ category.descriptionAr }}</td>
-                <td>
-                  <button class="btn btn-danger btn-sm me-1" (click)="toggleComfirm(category)" [disabled]="isLoading">Delete</button>
-                  <button class="btn btn-primary btn-sm me-1" (click)="showEditCategoryModal(category)" [disabled]="isLoading">Edit</button>
-                  <button class="btn btn-secondary btn-sm me-1" (click)="ShowAddSubCategory(category)" [disabled]="isLoading">Add SubCategory</button>
-                  <button class="btn btn-info btn-sm" (click)="ShowsubCategory(category.id)" [disabled]="isLoading">Show SubCategory</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </c-card-body>
-    </c-card>
-  </c-col>
-</c-row>
-
-<ng-container *ngIf="AddModalVisible">
-  <ng-container *ngTemplateOutlet="AddModal"></ng-container>
-</ng-container>
-<ng-template #AddModal>
-  <c-modal id="addCategoryModal" [visible]="AddModalVisible" (visibleChange)="handleAddModalChange($event)">
-    <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
-      <c-modal-header>
-        <h5 cModalTitle class="text-primary">Add Category</h5>
-      </c-modal-header>
-      <c-modal-body>
-        <div class="mb-3">
-          <label for="nameAr" class="form-label">Name (Arabic)</label>
-          <input type="text" id="nameAr" class="form-control" formControlName="nameAr">
-          <div *ngIf="categoryForm.get('nameAr')?.invalid && categoryForm.get('nameAr')?.touched" class="text-danger">
-            Name in Arabic is required.
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="nameEn" class="form-label">Name (English)</label>
-          <input type="text" id="nameEn" class="form-control" formControlName="nameEn">
-          <div *ngIf="categoryForm.get('nameEn')?.invalid && categoryForm.get('nameEn')?.touched" class="text-danger">
-            Name in English is required.
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="descriptionAr" class="form-label">Description (Arabic)</label>
-          <textarea id="descriptionAr" class="form-control" formControlName="descriptionAr"></textarea>
-          <div *ngIf="categoryForm.get('descriptionAr')?.invalid && categoryForm.get('descriptionAr')?.touched" class="text-danger">
-            Description in Arabic is required.
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="descriptionEn" class="form-label">Description (English)</label>
-          <textarea id="descriptionEn" class="form-control" formControlName="descriptionEn"></textarea>
-          <div *ngIf="categoryForm.get('descriptionEn')?.invalid && categoryForm.get('descriptionEn')?.touched" class="text-danger">
-            Description in English is required.
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="icon" class="form-label">Icon</label>
-          <input type="file" id="icon" class="form-control" (change)="onFileChange($event)">
-          <div *ngIf="fileError" class="text-danger">
-            Icon is required.
-          </div>
-        </div>
-      </c-modal-body>
-      <c-modal-footer>
-        <button class="btn btn-secondary" (click)="toggleLiveDemo()">Close</button>
-        <button type="submit" class="btn btn-primary" [disabled]="categoryForm.invalid || !selectedFile">Save changes</button>
-      </c-modal-footer>
-    </form>
-  </c-modal>
-</ng-template>
-
-<ng-container *ngIf="DeleteModalVisible">
-  <ng-container *ngTemplateOutlet="ComfirmDeleteModal"></ng-container>
-</ng-container>
-<ng-template #ComfirmDeleteModal>
-  <c-modal id="confirmDeleteModal" [visible]="DeleteModalVisible" (visibleChange)="handleDeleteModalChange($event)">
-    <c-modal-header>
-      <h5 cModalTitle class="text-danger">Confirm Delete</h5>
-    </c-modal-header>
-    <c-modal-body>
-      Are you sure you want to delete <strong>{{ selectedCategory?.nameEn }}</strong>?
-    </c-modal-body>
-    <c-modal-footer>
-      <button class="btn btn-secondary" (click)="closeComfirm()">Close</button>
-      <button type="button" class="btn btn-danger" (click)="confirmDelete()">Delete</button>
-    </c-modal-footer>
-  </c-modal>
-</ng-template>
-
-<ng-container *ngIf="EditModalVisible">
-  <ng-container *ngTemplateOutlet="EditModal"></ng-container>
-</ng-container>
-<ng-template #EditModal>
-  <c-modal id="editCategoryModal" [visible]="EditModalVisible">
-    <form [formGroup]="categoryForm" (ngSubmit)="onSubmitEdit()">
-      <c-modal-header>
-        <h5 cModalTitle class="text-primary">Edit Category</h5>
-      </c-modal-header>
-      <c-modal-body>
-        <div class="mb-3">
-          <label for="nameAr" class="form-label">Name (Arabic)</label>
-          <input type="text" id="nameAr" class="form-control" formControlName="nameAr">
-        </div>
-        <div class="mb-3">
-          <label for="nameEn" class="form-label">Name (English)</label>
-          <input type="text" id="nameEn" class="form-control" formControlName="nameEn">
-        </div>
-        <div class="mb-3">
-          <label for="descriptionAr" class="form-label">Description (Arabic)</label>
-          <textarea id="descriptionAr" class="form-control" formControlName="descriptionAr"></textarea>
-        </div>
-        <div class="mb-3">
-          <label for="descriptionEn" class="form-label">Description (English)</label>
-          <textarea id="descriptionEn" class="form-control" formControlName="descriptionEn"></textarea>
-        </div>
-        <div class="mb-3">
-          <label for="icon" class="form-label">Icon</label>
-          <input type="file" id="icon" class="form-control" (change)="onFileChange($event)">
-          <div *ngIf="fileError" class="text-danger">
-            Icon is required.
-          </div>
-        </div>
-      </c-modal-body>
-      <c-modal-footer>
-        <button class="btn btn-secondary" (click)="closeEditCategoryModal()">Close</button>
-        <button type="submit" class="btn btn-primary">Save changes</button>
-      </c-modal-footer>
-    </form>
-  </c-modal>
-</ng-template>
-
-<ng-container *ngIf="AddSubModalVisible">
-  <ng-container *ngTemplateOutlet="AddSubCategoryModal"></ng-container>
-</ng-container>
-<ng-template #AddSubCategoryModal>
-  <c-modal id="addSubCategoryModal" [visible]="AddSubModalVisible" (visibleChange)="handleAddSubCategoryModalChange($event)">
-    <form [formGroup]="subCategoryForm" (ngSubmit)="onAddSubCategorySubmit()" enctype="multipart/form-data">
-      <c-modal-header>
-        <h5 cModalTitle class="text-primary">Add SubCategory</h5>
-      </c-modal-header>
-      <c-modal-body>
-        <div class="mb-3">
-          <label for="nameAr" class="form-label">Name (Arabic)</label>
-          <input type="text" id="nameAr" class="form-control" formControlName="nameAr">
-          <div *ngIf="subCategoryForm.get('nameAr')?.invalid && subCategoryForm.get('nameAr')?.touched" class="text-danger">
-            Name in Arabic is required.
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="nameEn" class="form-label">Name (English)</label>
-          <input type="text" id="nameEn" class="form-control" formControlName="nameEn">
-          <div *ngIf="subCategoryForm.get('nameEn')?.invalid && subCategoryForm.get('nameEn')?.touched" class="text-danger">
-            Name in English is required.
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="descriptionAr" class="form-label">Description (Arabic)</label>
-          <textarea id="descriptionAr" class="form-control" formControlName="descriptionAr"></textarea>
-          <div *ngIf="subCategoryForm.get('descriptionAr')?.invalid && subCategoryForm.get('descriptionAr')?.touched" class="text-danger">
-            Description in Arabic is required.
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="descriptionEn" class="form-label">Description (English)</label>
-          <textarea id="descriptionEn" class="form-control" formControlName="descriptionEn"></textarea>
-          <div *ngIf="subCategoryForm.get('descriptionEn')?.invalid && subCategoryForm.get('descriptionEn')?.touched" class="text-danger">
-            Description in English is required.
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="icon" class="form-label">Icon</label>
-          <input type="file" id="icon" class="form-control" (change)="onFileChange($event)">
-          <div *ngIf="fileError" class="text-danger">
-            Icon is required.
-          </div>
-        </div>
-      </c-modal-body>
-      <c-modal-footer>
-        <button class="btn btn-secondary" (click)="closeAddSubCategoryModal()">Close</button>
-        <button type="submit" class="btn btn-primary" [disabled]="subCategoryForm.invalid || !selectedFile">Add SubCategory</button>
-      </c-modal-footer>
-    </form>
-  </c-modal>
-</ng-template>
-
-<ng-container *ngIf="ShowSubCategoryModalVisible">
-  <ng-container *ngTemplateOutlet="SubCategoryModal"></ng-container>
-</ng-container>
-<ng-template #SubCategoryModal>
-  <c-modal 
-    #modalLg 
-    id="modalLg" 
-    size="xl"
-    [scrollable]="true"
-    id="subCategoryModal" 
-    [visible]="ShowSubCategoryModalVisible" 
-    (visibleChange)="handleSubCategoryModalChange($event)"
-  >
-    <c-modal-header>
-      <h5 cModalTitle class="text-primary">SubCategory</h5>
-    </c-modal-header>
-    <c-modal-body>
-      <div class="table-responsive">
-        <table
-          [hover]="true"
-          [responsive]="true"
-          [striped]="true"
-          align="middle"
-          cTable
-          class="table table-bordered table-hover text-center"
-        >
-          <thead class="table-light">
-            <tr>
-              <th></th>
-              <th>Name</th>
-              <th>الاسم</th>
-              <th>Description (EN)</th>
-              <th>الوصف</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let subcategory of SubCategory.data">
-              <td>
-                <c-avatar 
-                  [size]="'md'" 
-                  [src]="subcategory.iconUrl" 
-                  status="success"
-                ></c-avatar>
-              </td>
-              <td>{{ subcategory.nameEn }}</td>
-              <td>{{ subcategory.nameAr }}</td>
-              <td>{{ subcategory.descriptionEn }}</td>
-              <td>{{ subcategory.descriptionAr }}</td>
-              <td>
-                <button 
-                  class="btn btn-danger btn-sm me-1" 
-                  (click)="toggleSubCategoryComfirm(subcategory)"
-                  [disabled]="isLoading"
-                >
-                  Delete
-                </button>
-                <button 
-                  class="btn btn-primary btn-sm me-1" 
-                  (click)="showEditSubCategoryModal(subcategory)"
-                  [disabled]="isLoading"
-                >
-                  Edit
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </c-modal-body>
-    <c-modal-footer>
-      <button 
-        class="btn btn-secondary" 
-        (click)="closeSubCategoryModal()"
-      >
-        Close
+<c-card>
+  <c-card-header>
+    <div class="d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">إدارة الفئات</h4>
+      <button cButton color="primary" (click)="showAddCategoryModal()" [disabled]="isLoading">
+        <i class="cil-plus"></i>
+        إضافة فئة جديدة
       </button>
-    </c-modal-footer>
-  </c-modal>
-</ng-template>
+    </div>
+  </c-card-header>
+  <c-card-body>
+    <div class="table-responsive">
+      <table cTable hover>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>الصورة</th>
+            <th>الاسم بالعربية</th>
+            <th>الاسم بالإنجليزية</th>
+            <th>الوصف بالعربية</th>
+            <th>الوصف بالإنجليزية</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let category of categories.data; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>
+              <c-avatar [src]="category.iconUrl" size="md" data-tooltip="عرض الصورة"></c-avatar>
+            </td>
+            <td>{{ category.nameAr }}</td>
+            <td>{{ category.nameEn }}</td>
+            <td>{{ category.descriptionAr }}</td>
+            <td>{{ category.descriptionEn }}</td>
+            <td>
+              <div class="btn-group">
+                <button cButton color="info" size="sm" (click)="ShowsubCategory(category.id)" [disabled]="isLoading" data-tooltip="عرض الفئات الفرعية">
+                  <i class="cil-list"></i>
+                  الفئات الفرعية
+                </button>
+                <button cButton color="primary" size="sm" (click)="showEditCategoryModal(category)" [disabled]="isLoading" data-tooltip="تعديل الفئة">
+                  <i class="cil-pencil"></i>
+                  تعديل
+                </button>
+                <button cButton color="danger" size="sm" (click)="showDeleteCategoryModal(category)" [disabled]="isLoading" data-tooltip="حذف الفئة">
+                  <i class="cil-trash"></i>
+                  حذف
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </c-card-body>
+</c-card>
 
-<ng-container *ngIf="SubCategoryDeleteModalVisible">
-  <ng-container *ngTemplateOutlet="SubCategoryDelete"></ng-container>
-</ng-container>
-<ng-template #SubCategoryDelete>
-  <c-modal id="confirmDeleteModal" [visible]="SubCategoryDeleteModalVisible" (visibleChange)="handleDeleteModalChange($event)">
-    <c-modal-header>
-      <h5 cModalTitle class="text-danger">Confirm Delete</h5>
-    </c-modal-header>
-    <c-modal-body>
-      <p>Are you sure you want to delete <strong>{{ selectedSubCategory?.nameEn }}</strong>?</p>
-    </c-modal-body>
-    <c-modal-footer>
-      <button class="btn btn-secondary" (click)="closeSubCategoryComfirm()">Close</button>
-      <button type="button" class="btn btn-danger" (click)="confirmSubCategoryDelete()">Delete</button>
-    </c-modal-footer>
-  </c-modal>
-</ng-template>
-
-<ng-container *ngIf="EditSubCategoryModalVisible">
-  <ng-container *ngTemplateOutlet="EditSubCategoryModal"></ng-container>
-</ng-container>
-<ng-template #EditSubCategoryModal>
-  <c-modal id="editCategoryModal" [visible]="EditSubCategoryModalVisible">
-    <form [formGroup]="subCategoryForm" (ngSubmit)="onEditSubCategorySubmit()">
-      <c-modal-header>
-        <h5 cModalTitle class="text-primary">Edit SubCategory</h5>
-      </c-modal-header>
-      <c-modal-body>
-        <div class="mb-3">
-          <label for="nameAr" class="form-label">Name (Arabic)</label>
-          <input type="text" id="nameAr" class="form-control" formControlName="nameAr">
-        </div>
-        <div class="mb-3">
-          <label for="nameEn" class="form-label">Name (English)</label>
-          <input type="text" id="nameEn" class="form-control" formControlName="nameEn">
-        </div>
-        <div class="mb-3">
-          <label for="descriptionAr" class="form-label">Description (Arabic)</label>
-          <textarea id="descriptionAr" class="form-control" formControlName="descriptionAr"></textarea>
-        </div>
-        <div class="mb-3">
-          <label for="descriptionEn" class="form-label">Description (English)</label>
-          <textarea id="descriptionEn" class="form-control" formControlName="descriptionEn"></textarea>
-        </div>
-        <div class="mb-3">
-          <label for="icon" class="form-label">Icon</label>
-          <input type="file" id="icon" class="form-control" (change)="onFileChange($event)">
-          <div *ngIf="fileError" class="text-danger">
-            Icon is required.
+<c-modal [visible]="AddModalVisible" (visibleChange)="!AddModalVisible && closeAddCategoryModal()" size="lg">
+  <c-modal-header>
+    <h5 cModalTitle>إضافة فئة جديدة</h5>
+    <button cButtonClose (click)="closeAddCategoryModal()"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label cFormLabel for="nameAr">الاسم بالعربية</label>
+          <input cFormControl id="nameAr" type="text" formControlName="nameAr" [class.is-invalid]="categoryForm.get('nameAr')?.invalid && categoryForm.get('nameAr')?.touched">
+          <div class="invalid-feedback" *ngIf="categoryForm.get('nameAr')?.errors?.['required']">
+            الاسم بالعربية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('nameAr')?.errors?.['minlength']">
+            يجب أن يكون الاسم 3 أحرف على الأقل
           </div>
         </div>
-      </c-modal-body>
-      <c-modal-footer>
-        <button class="btn btn-secondary" (click)="closeEditSubCategoryModal()">Close</button>
-        <button type="submit" class="btn btn-primary">Save changes</button>
-      </c-modal-footer>
+        <div class="col-md-6">
+          <label cFormLabel for="nameEn">الاسم بالإنجليزية</label>
+          <input cFormControl id="nameEn" type="text" formControlName="nameEn" [class.is-invalid]="categoryForm.get('nameEn')?.invalid && categoryForm.get('nameEn')?.touched">
+          <div class="invalid-feedback" *ngIf="categoryForm.get('nameEn')?.errors?.['required']">
+            الاسم بالإنجليزية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('nameEn')?.errors?.['minlength']">
+            يجب أن يكون الاسم 3 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label cFormLabel for="descriptionAr">الوصف بالعربية</label>
+          <textarea cFormControl id="descriptionAr" formControlName="descriptionAr" rows="3" [class.is-invalid]="categoryForm.get('descriptionAr')?.invalid && categoryForm.get('descriptionAr')?.touched"></textarea>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('descriptionAr')?.errors?.['required']">
+            الوصف بالعربية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('descriptionAr')?.errors?.['minlength']">
+            يجب أن يكون الوصف 10 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label cFormLabel for="descriptionEn">الوصف بالإنجليزية</label>
+          <textarea cFormControl id="descriptionEn" formControlName="descriptionEn" rows="3" [class.is-invalid]="categoryForm.get('descriptionEn')?.invalid && categoryForm.get('descriptionEn')?.touched"></textarea>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('descriptionEn')?.errors?.['required']">
+            الوصف بالإنجليزية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('descriptionEn')?.errors?.['minlength']">
+            يجب أن يكون الوصف 10 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-12">
+          <label cFormLabel for="icon">الصورة</label>
+          <input cFormControl id="icon" type="file" accept="image/*" (change)="onFileChange($event)" [class.is-invalid]="fileError">
+          <div class="invalid-feedback" *ngIf="fileError">
+            يجب اختيار صورة
+          </div>
+        </div>
+      </div>
     </form>
-  </c-modal>
-</ng-template>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeAddCategoryModal()" [disabled]="isLoading">
+      <i class="cil-x-circle"></i>
+      إلغاء
+    </button>
+    <button cButton color="primary" (click)="onSubmit()" [disabled]="categoryForm.invalid || !selectedFile || isLoading">
+      <i class="cil-save"></i>
+      حفظ
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<c-modal [visible]="EditModalVisible" (visibleChange)="!EditModalVisible && closeEditCategoryModal()" size="lg">
+  <c-modal-header>
+    <h5 cModalTitle>تعديل الفئة</h5>
+    <button cButtonClose (click)="closeEditCategoryModal()"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form [formGroup]="categoryForm" (ngSubmit)="onSubmitEdit()">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label cFormLabel for="editNameAr">الاسم بالعربية</label>
+          <input cFormControl id="editNameAr" type="text" formControlName="nameAr" [class.is-invalid]="categoryForm.get('nameAr')?.invalid && categoryForm.get('nameAr')?.touched">
+          <div class="invalid-feedback" *ngIf="categoryForm.get('nameAr')?.errors?.['required']">
+            الاسم بالعربية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('nameAr')?.errors?.['minlength']">
+            يجب أن يكون الاسم 3 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label cFormLabel for="editNameEn">الاسم بالإنجليزية</label>
+          <input cFormControl id="editNameEn" type="text" formControlName="nameEn" [class.is-invalid]="categoryForm.get('nameEn')?.invalid && categoryForm.get('nameEn')?.touched">
+          <div class="invalid-feedback" *ngIf="categoryForm.get('nameEn')?.errors?.['required']">
+            الاسم بالإنجليزية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('nameEn')?.errors?.['minlength']">
+            يجب أن يكون الاسم 3 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label cFormLabel for="editDescriptionAr">الوصف بالعربية</label>
+          <textarea cFormControl id="editDescriptionAr" formControlName="descriptionAr" rows="3" [class.is-invalid]="categoryForm.get('descriptionAr')?.invalid && categoryForm.get('descriptionAr')?.touched"></textarea>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('descriptionAr')?.errors?.['required']">
+            الوصف بالعربية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('descriptionAr')?.errors?.['minlength']">
+            يجب أن يكون الوصف 10 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label cFormLabel for="editDescriptionEn">الوصف بالإنجليزية</label>
+          <textarea cFormControl id="editDescriptionEn" formControlName="descriptionEn" rows="3" [class.is-invalid]="categoryForm.get('descriptionEn')?.invalid && categoryForm.get('descriptionEn')?.touched"></textarea>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('descriptionEn')?.errors?.['required']">
+            الوصف بالإنجليزية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="categoryForm.get('descriptionEn')?.errors?.['minlength']">
+            يجب أن يكون الوصف 10 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-12">
+          <label cFormLabel for="editIcon">الصورة</label>
+          <input cFormControl id="editIcon" type="file" accept="image/*" (change)="onFileChange($event)">
+          <small class="text-muted">اترك هذا الحقل فارغاً إذا كنت لا تريد تغيير الصورة</small>
+        </div>
+      </div>
+    </form>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeEditCategoryModal()" [disabled]="isLoading">
+      <i class="cil-x-circle"></i>
+      إلغاء
+    </button>
+    <button cButton color="primary" (click)="onSubmitEdit()" [disabled]="categoryForm.invalid || isLoading">
+      <i class="cil-save"></i>
+      حفظ التغييرات
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<c-modal [visible]="DeleteModalVisible" (visibleChange)="!DeleteModalVisible && closeDeleteCategoryModal()">
+  <c-modal-header>
+    <h5 cModalTitle>تأكيد الحذف</h5>
+    <button cButtonClose (click)="closeDeleteCategoryModal()"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <p>هل أنت متأكد من حذف الفئة <strong>{{ selectedCategory?.nameAr }}</strong>؟</p>
+    <p class="text-danger">تحذير: سيتم حذف جميع الفئات الفرعية المرتبطة بهذه الفئة.</p>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeDeleteCategoryModal()" [disabled]="isLoading">
+      <i class="cil-x-circle"></i>
+      إلغاء
+    </button>
+    <button cButton color="danger" (click)="confirmDelete()" [disabled]="isLoading">
+      <i class="cil-trash"></i>
+      حذف
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<c-modal [visible]="ShowSubCategoryModalVisible" (visibleChange)="!ShowSubCategoryModalVisible && closeSubCategoryModal()" size="xl">
+  <c-modal-header>
+    <h5 cModalTitle>الفئات الفرعية</h5>
+    <button cButtonClose (click)="closeSubCategoryModal()"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="mb-0">الفئات الفرعية للفئة: {{ selectedCategory?.nameAr }}</h6>
+      <button cButton color="primary" (click)="ShowAddSubCategory(selectedCategory!)" [disabled]="isLoading">
+        <i class="cil-plus"></i>
+        إضافة فئة فرعية
+      </button>
+    </div>
+    <div class="table-responsive">
+      <table cTable hover>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>الصورة</th>
+            <th>الاسم بالعربية</th>
+            <th>الاسم بالإنجليزية</th>
+            <th>الوصف بالعربية</th>
+            <th>الوصف بالإنجليزية</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let subcategory of SubCategory.data; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>
+              <c-avatar [src]="subcategory.iconUrl" size="md" data-tooltip="عرض الصورة"></c-avatar>
+            </td>
+            <td>{{ subcategory.nameAr }}</td>
+            <td>{{ subcategory.nameEn }}</td>
+            <td>{{ subcategory.descriptionAr }}</td>
+            <td>{{ subcategory.descriptionEn }}</td>
+            <td>
+              <div class="btn-group">
+                <button cButton color="primary" size="sm" (click)="showEditSubCategoryModal(subcategory)" [disabled]="isLoading" data-tooltip="تعديل الفئة الفرعية">
+                  <i class="cil-pencil"></i>
+                  تعديل
+                </button>
+                <button cButton color="danger" size="sm" (click)="showDeleteSubCategoryModal(subcategory)" [disabled]="isLoading" data-tooltip="حذف الفئة الفرعية">
+                  <i class="cil-trash"></i>
+                  حذف
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeSubCategoryModal()" [disabled]="isLoading">
+      <i class="cil-x-circle"></i>
+      إغلاق
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<c-modal [visible]="AddSubModalVisible" (visibleChange)="!AddSubModalVisible && closeAddSubCategoryModal()" size="lg">
+  <c-modal-header>
+    <h5 cModalTitle>إضافة فئة فرعية</h5>
+    <button cButtonClose (click)="closeAddSubCategoryModal()"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form [formGroup]="subCategoryForm" (ngSubmit)="onAddSubCategorySubmit()">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label cFormLabel for="subNameAr">الاسم بالعربية</label>
+          <input cFormControl id="subNameAr" type="text" formControlName="nameAr" [class.is-invalid]="subCategoryForm.get('nameAr')?.invalid && subCategoryForm.get('nameAr')?.touched">
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('nameAr')?.errors?.['required']">
+            الاسم بالعربية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('nameAr')?.errors?.['minlength']">
+            يجب أن يكون الاسم 3 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label cFormLabel for="subNameEn">الاسم بالإنجليزية</label>
+          <input cFormControl id="subNameEn" type="text" formControlName="nameEn" [class.is-invalid]="subCategoryForm.get('nameEn')?.invalid && subCategoryForm.get('nameEn')?.touched">
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('nameEn')?.errors?.['required']">
+            الاسم بالإنجليزية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('nameEn')?.errors?.['minlength']">
+            يجب أن يكون الاسم 3 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label cFormLabel for="subDescriptionAr">الوصف بالعربية</label>
+          <textarea cFormControl id="subDescriptionAr" formControlName="descriptionAr" rows="3" [class.is-invalid]="subCategoryForm.get('descriptionAr')?.invalid && subCategoryForm.get('descriptionAr')?.touched"></textarea>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('descriptionAr')?.errors?.['required']">
+            الوصف بالعربية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('descriptionAr')?.errors?.['minlength']">
+            يجب أن يكون الوصف 10 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label cFormLabel for="subDescriptionEn">الوصف بالإنجليزية</label>
+          <textarea cFormControl id="subDescriptionEn" formControlName="descriptionEn" rows="3" [class.is-invalid]="subCategoryForm.get('descriptionEn')?.invalid && subCategoryForm.get('descriptionEn')?.touched"></textarea>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('descriptionEn')?.errors?.['required']">
+            الوصف بالإنجليزية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('descriptionEn')?.errors?.['minlength']">
+            يجب أن يكون الوصف 10 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-12">
+          <label cFormLabel for="subIcon">الصورة</label>
+          <input cFormControl id="subIcon" type="file" accept="image/*" (change)="onFileChange($event)" [class.is-invalid]="fileError">
+          <div class="invalid-feedback" *ngIf="fileError">
+            يجب اختيار صورة
+          </div>
+        </div>
+      </div>
+    </form>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeAddSubCategoryModal()" [disabled]="isLoading">
+      <i class="cil-x-circle"></i>
+      إلغاء
+    </button>
+    <button cButton color="primary" (click)="onAddSubCategorySubmit()" [disabled]="subCategoryForm.invalid || !selectedFile || isLoading">
+      <i class="cil-save"></i>
+      حفظ
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<c-modal [visible]="EditSubCategoryModalVisible" (visibleChange)="!EditSubCategoryModalVisible && closeEditSubCategoryModal()" size="lg">
+  <c-modal-header>
+    <h5 cModalTitle>تعديل الفئة الفرعية</h5>
+    <button cButtonClose (click)="closeEditSubCategoryModal()"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form [formGroup]="subCategoryForm" (ngSubmit)="onEditSubCategorySubmit()">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label cFormLabel for="editSubNameAr">الاسم بالعربية</label>
+          <input cFormControl id="editSubNameAr" type="text" formControlName="nameAr" [class.is-invalid]="subCategoryForm.get('nameAr')?.invalid && subCategoryForm.get('nameAr')?.touched">
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('nameAr')?.errors?.['required']">
+            الاسم بالعربية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('nameAr')?.errors?.['minlength']">
+            يجب أن يكون الاسم 3 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label cFormLabel for="editSubNameEn">الاسم بالإنجليزية</label>
+          <input cFormControl id="editSubNameEn" type="text" formControlName="nameEn" [class.is-invalid]="subCategoryForm.get('nameEn')?.invalid && subCategoryForm.get('nameEn')?.touched">
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('nameEn')?.errors?.['required']">
+            الاسم بالإنجليزية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('nameEn')?.errors?.['minlength']">
+            يجب أن يكون الاسم 3 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label cFormLabel for="editSubDescriptionAr">الوصف بالعربية</label>
+          <textarea cFormControl id="editSubDescriptionAr" formControlName="descriptionAr" rows="3" [class.is-invalid]="subCategoryForm.get('descriptionAr')?.invalid && subCategoryForm.get('descriptionAr')?.touched"></textarea>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('descriptionAr')?.errors?.['required']">
+            الوصف بالعربية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('descriptionAr')?.errors?.['minlength']">
+            يجب أن يكون الوصف 10 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label cFormLabel for="editSubDescriptionEn">الوصف بالإنجليزية</label>
+          <textarea cFormControl id="editSubDescriptionEn" formControlName="descriptionEn" rows="3" [class.is-invalid]="subCategoryForm.get('descriptionEn')?.invalid && subCategoryForm.get('descriptionEn')?.touched"></textarea>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('descriptionEn')?.errors?.['required']">
+            الوصف بالإنجليزية مطلوب
+          </div>
+          <div class="invalid-feedback" *ngIf="subCategoryForm.get('descriptionEn')?.errors?.['minlength']">
+            يجب أن يكون الوصف 10 أحرف على الأقل
+          </div>
+        </div>
+        <div class="col-12">
+          <label cFormLabel for="editSubIcon">الصورة</label>
+          <input cFormControl id="editSubIcon" type="file" accept="image/*" (change)="onFileChange($event)">
+          <small class="text-muted">اترك هذا الحقل فارغاً إذا كنت لا تريد تغيير الصورة</small>
+        </div>
+      </div>
+    </form>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeEditSubCategoryModal()" [disabled]="isLoading">
+      <i class="cil-x-circle"></i>
+      إلغاء
+    </button>
+    <button cButton color="primary" (click)="onEditSubCategorySubmit()" [disabled]="subCategoryForm.invalid || isLoading">
+      <i class="cil-save"></i>
+      حفظ التغييرات
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<c-modal [visible]="DeleteSubModalVisible" (visibleChange)="!DeleteSubModalVisible && closeDeleteSubCategoryModal()">
+  <c-modal-header>
+    <h5 cModalTitle>تأكيد الحذف</h5>
+    <button cButtonClose (click)="closeDeleteSubCategoryModal()"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <p>هل أنت متأكد من حذف الفئة الفرعية <strong>{{ selectedSubCategory?.nameAr }}</strong>؟</p>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeDeleteSubCategoryModal()" [disabled]="isLoading">
+      <i class="cil-x-circle"></i>
+      إلغاء
+    </button>
+    <button cButton color="danger" (click)="confirmSubCategoryDelete()" [disabled]="isLoading">
+      <i class="cil-trash"></i>
+      حذف
+    </button>
+  </c-modal-footer>
+</c-modal>
 
 

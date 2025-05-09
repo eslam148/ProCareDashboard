@@ -4,6 +4,7 @@ export interface Category {
   nameEn: string;
   descriptionAr: string;
   descriptionEn: string;
+  icon: string;
   iconUrl: string;
 }
 
@@ -25,5 +26,6 @@ export interface  SubCategoryRequest {
   nameEn: string;
   descriptionAr: string;
   descriptionEn: string;
+  icon: string;
   iconUrl: string;
 }
