@@ -1,17 +1,44 @@
 export interface LoginResponse {
+    status: number;
+    message: string;
+    internalMessage: string | null;
     data: {
-        birthOfDate: string | null;
+        token: string;
         firstName: string;
         lastName: string;
-        loginStatus: number;
         phoneNumber: string;
+        birthOfDate: string | null;
         role: number;
+        loginStatus: number;
+    };
+    subStatus: number;
+}
+
+export interface ApiResponse<T> {
+    status: number;
+    message: string;
+    internalMessage: string | null;
+    data: T;
+    subStatus: number;
+}
+
+export interface RefreshTokenResponse {
+    status: number;
+    message: string;
+    internalMessage: string | null;
+    data: {
         token: string;
     };
-    internalMessage: string | null;
-    message: string;
-    status: number;
     subStatus: number;
+}
+
+export interface UserDetails {
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    birthOfDate: string | null;
+    role: number;
+    loginStatus: number;
 }
 
 

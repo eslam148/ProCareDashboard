@@ -1,48 +1,96 @@
-<div class="bg-light dark:bg-transparent min-vh-100 d-flex flex-row align-items-center">
+<div class="min-vh-100 d-flex justify-content-center bg-light dark:bg-dark">
   <c-container>
     <c-row class="justify-content-center">
-      <c-col lg="7" md="9" xl="6">
-        <c-card class="mx-4">
-          <c-card-body class="p-4">
-            <form cForm (ngSubmit)="onRegister()">
-              <h1>Register</h1>
-              <p class="text-body-secondary">Create your account</p>
-              <c-input-group class="mb-3">
-                <span cInputGroupText>
-                  <svg cIcon name="cilUser"></svg>
-                </span>
-                <input autoComplete="given-name" cFormControl placeholder="First Name" [(ngModel)]="firstName" name="firstName" />
-              </c-input-group>
-              <c-input-group class="mb-3">
-                <span cInputGroupText>
-                  <svg cIcon name="cilUser"></svg>
-                </span>
-                <input autoComplete="family-name" cFormControl placeholder="Last Name" [(ngModel)]="lastName" name="lastName" />
-              </c-input-group>
-              <c-input-group class="mb-3">
-                <span cInputGroupText>
-                  <svg cIcon name="cilPhone"></svg>
-                </span>
-                <input autoComplete="tel" cFormControl placeholder="Phone Number" [(ngModel)]="phoneNumber" name="phoneNumber" />
-              </c-input-group>
-              <c-input-group class="mb-3">
-                <span cInputGroupText>
-                  <svg cIcon name="cilLockLocked"></svg>
-                </span>
-                <input autoComplete="new-password" cFormControl placeholder="Password" type="password" [(ngModel)]="password" name="password" />
-              </c-input-group>
-              <c-input-group class="mb-4">
-                <span cInputGroupText>
-                  <svg cIcon name="cilLockLocked"></svg>
-                </span>
-                <input autoComplete="new-password" cFormControl placeholder="Repeat password" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" />
-              </c-input-group>
-              <div class="d-grid">
-                <button cButton color="success">Create Account</button>
-              </div>
-            </form>
-          </c-card-body>
-        </c-card>
+      <c-col lg="12" md="12" xl="12">
+        <div class="p-3 p-md-4 w-100">
+          <c-card>
+            <c-card-header>
+              <strong>تسجيل حساب جديد</strong>
+            </c-card-header>
+            <c-card-body>
+              <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+                <c-row>
+                  <c-col xs="12" md="6">
+                    <div class="mb-3">
+                      <label cFormLabel for="firstName">الاسم الأول</label>
+                      <input
+                        type="text"
+                        cFormControl
+                        id="firstName"
+                        formControlName="firstName"
+                        [ngClass]="{'is-invalid': registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched}"
+                      >
+                      <div class="invalid-feedback" *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched">
+                        الاسم الأول مطلوب
+                      </div>
+                    </div>
+                  </c-col>
+                  <c-col xs="12" md="6">
+                    <div class="mb-3">
+                      <label cFormLabel for="lastName">الاسم الأخير</label>
+                      <input
+                        type="text"
+                        cFormControl
+                        id="lastName"
+                        formControlName="lastName"
+                        [ngClass]="{'is-invalid': registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched}"
+                      >
+                      <div class="invalid-feedback" *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched">
+                        الاسم الأخير مطلوب
+                      </div>
+                    </div>
+                  </c-col>
+                </c-row>
+
+                <div class="mb-3">
+                  <label cFormLabel for="phoneNumber">رقم الهاتف</label>
+                  <input
+                    type="tel"
+                    cFormControl
+                    id="phoneNumber"
+                    formControlName="phoneNumber"
+                    [ngClass]="{'is-invalid': registerForm.get('phoneNumber')?.invalid && registerForm.get('phoneNumber')?.touched}"
+                  >
+                  <div class="invalid-feedback" *ngIf="registerForm.get('phoneNumber')?.invalid && registerForm.get('phoneNumber')?.touched">
+                    رقم الهاتف يجب أن يكون 11 رقم
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label cFormLabel for="password">كلمة المرور</label>
+                  <input
+                    type="password"
+                    cFormControl
+                    id="password"
+                    formControlName="password"
+                    [ngClass]="{'is-invalid': registerForm.get('password')?.invalid && registerForm.get('password')?.touched}"
+                  >
+                  <div class="invalid-feedback" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+                    كلمة المرور يجب أن تكون 6 أحرف على الأقل
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label cFormLabel for="confirmPassword">تأكيد كلمة المرور</label>
+                  <input
+                    type="password"
+                    cFormControl
+                    id="confirmPassword"
+                    formControlName="confirmPassword"
+                    [ngClass]="{'is-invalid': registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched}"
+                  >
+                  <div class="invalid-feedback" *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched">
+                    كلمة المرور غير متطابقة
+                  </div>
+                </div>
+
+                <button cButton color="primary" type="submit" [disabled]="registerForm.invalid">
+                  تسجيل
+                </button>
+              </form>
+            </c-card-body>
+          </c-card>
+        </div>
       </c-col>
     </c-row>
   </c-container>

@@ -1,281 +1,276 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectorRef } from '@angular/core';
-import { AdminService } from '../../Services/admin.service';
-import { CategoryService } from '../../Services/category.service';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { LocationService } from '../../Services/location.service';
 import {
   CardBodyComponent,
   CardComponent,
+  CardHeaderComponent,
   ColComponent,
   RowComponent,
   TableDirective,
   TextColorDirective,
-  AvatarComponent,
   ModalComponent,
   ModalHeaderComponent,
-  ModalTitleDirective,
   ModalFooterComponent,
   ModalBodyComponent,
-  SpinnerComponent
-
+  SpinnerComponent,
+  ButtonDirective,
+  CardModule,
+  FormModule,
+  GridModule,
+  ButtonModule,
+  TableModule
 } from '@coreui/angular';
 import { LocationCity, LocationGovernorate } from '../../app/Model/Locaton';
-import { set } from 'lodash-es';
+import { Subject } from 'rxjs';
+import { takeUntil, finalize } from 'rxjs/operators';
+import { IconModule } from '@coreui/icons-angular';
+
+interface ApiResponse<T> {
+  data: T;
+  status: number;
+  message: string;
+}
 
 @Component({
   selector: 'app-location',
   standalone: true,
-  imports: [CommonModule,
-    CardBodyComponent,
-    CardComponent,
-    ColComponent,
-    RowComponent,
-    TableDirective,
-    TextColorDirective,
+  imports: [
+    CommonModule,
     ModalComponent,
     ModalHeaderComponent,
-    // ModalTitleDirective,
     ModalFooterComponent,
     ModalBodyComponent,
     SpinnerComponent,
-    ReactiveFormsModule
+    ButtonDirective,
+    ReactiveFormsModule,
+    FormsModule,
+    CardModule,
+    IconModule,
+    FormModule,
+    GridModule,
+    ButtonModule,
+    TableModule,
+    CardBodyComponent,
+    CardHeaderComponent,
+    TableDirective
   ],
   templateUrl: './location.component.html',
   styleUrls: ['./location.component.scss']
 })
-export class LocationComponent {
-  isLoading: boolean = false;
-  ListGovernorate: LocationGovernorate[] = [];
-  ListCity: LocationCity[] = [];
-  AddModalVisible: boolean = false;
-  DeleteModalVisible: boolean = false;
-  selectedEntity: any | null = null;
-  GovernorateForm: FormGroup;
-  ModalVisible: boolean = false; // Tracks whether the modal is visible
-  isEditMode: boolean = false; // Tracks whether the form is in edit mode
-  CityModalVisible: boolean = false; // Tracks whether the city modal is visible
-  DeleteCityModalVisible: boolean = false; // Tracks the visibility of the delete city modal
-  AddCityModalVisible: boolean = false; // Tracks the visibility of the add city modal
-  isEntityGovernorate: boolean = true; // Tracks whether the entity is Governorate or City
+export class LocationComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
+  isLoading = false;
+  loadingMessage = '';
+  
+  governorates: LocationGovernorate[] = [];
+  cities: LocationCity[] = [];
+  selectedGovernorateId: number | null = null;
+  
+  governorateForm: FormGroup;
+  cityForm: FormGroup;
+  
+  showGovernorateModal = false;
+  showCityModal = false;
+  showDeleteModal = false;
+  isEditing = false;
+  deleteType: 'governorate' | 'city' | null = null;
+  itemToDelete: any = null;
 
-  constructor(private LocationService: LocationService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {
-    this.GovernorateForm = this.fb.group({
-      nameAr: ['', Validators.required],
-      nameEn: ['', Validators.required],
+  constructor(
+    private locationService: LocationService,
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.governorateForm = this.fb.group({
+      id: [null],
+      nameAr: ['', [Validators.required, Validators.minLength(3)]],
+      nameEn: ['', [Validators.required, Validators.minLength(3)]]
+    });
+
+    this.cityForm = this.fb.group({
+      id: [null],
+      governorateId: [null, Validators.required],
+      nameAr: ['', [Validators.required, Validators.minLength(3)]],
+      nameEn: ['', [Validators.required, Validators.minLength(3)]]
     });
   }
 
   ngOnInit(): void {
-    this.getAllGovernorate();
+    this.loadGovernorates();
   }
 
-  onSubmitCity() {
-    console.log(this.isEditMode);
-    if (this.GovernorateForm.valid) {
-      const formData = this.GovernorateForm.value;
-      console.log('Form Data:', formData);
-      formData.governorateId = this.selectedEntity ? this.selectedEntity.id : 0; // Set ID for update or 0 for new governorate
-      this.isLoading = true;
-
-      this.LocationService.AddLocationsCity(formData).subscribe((res) => {
-        console.log(res);
-        this.isLoading = false;
-        this.getAllGovernorate();
-        this.AddCityModalVisible = false;
-      }, (error) => {
-        console.error('Error adding governorate:', error);
-        this.isLoading = false;
-      });
-    }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  ShowAddCity(id: number) {
-    this.AddCityModalVisible = true;
-    this.selectedEntity = null;
-    this.GovernorateForm.reset(); // Reset the form fields
-    this.selectedEntity = this.ListGovernorate.find(g => g.id === id) || null;
+  private setLoading(isLoading: boolean, message: string = ''): void {
+    this.isLoading = isLoading;
+    this.loadingMessage = message;
+    this.cdr.detectChanges();
   }
 
-  handleAddCityModalChange(event: boolean): void {
-    this.AddCityModalVisible = event;
-  }
-
-  handleCityModalChange(event: boolean): void {
-    this.CityModalVisible = event;
-  }
-
-  handleDeleteCityModalChange(event: boolean): void {
-    this.DeleteCityModalVisible = event;
-  }
-
-  getAllGovernorate() {
-    this.isLoading = true;
-    this.LocationService.getAllLocationsGovernorate().subscribe((res) => {
-      this.ListGovernorate = res.data;
-      console.log(this.ListGovernorate);
-      console.log(res);
-      this.isLoading = false;
-      console.log(this.ListGovernorate);
-    }, (error) => {
-      console.error('Error fetching governorates:', error);
-      this.isLoading = false;
-    });
-  }
-
-  getAllCities(governorateId: number): void {
-    this.isLoading = true;
-    this.LocationService.getAllLocationsCites(governorateId).subscribe(
-      (res: any) => {
-        this.ListCity = res.data;
-        this.isLoading = false;
+  loadGovernorates(): void {
+    this.setLoading(true, 'جاري تحميل المحافظات...');
+    this.locationService.getAllLocationsGovernorate().subscribe(
+      (response: ApiResponse<LocationGovernorate[]>) => {
+        this.governorates = response.data;
+        this.setLoading(false);
       },
-      (error: any) => {
-        console.error('Error fetching cities:', error);
-        this.isLoading = false;
+      (error) => {
+        console.error('خطأ في تحميل المحافظات:', error);
+        this.setLoading(false);
       }
     );
   }
 
-  ShowCityCategory(id: number) {
-    this.isLoading = true;
-    this.LocationService.getCityByGovernorateId(id).subscribe((res) => {
-      this.ListCity = res.data;
-      this.isLoading = false;
-      this.CityModalVisible = true;
-      console.log(this.ListCity);
+  loadCities(governorateId: number): void {
+    this.setLoading(true, 'جاري تحميل المدن...');
+    this.selectedGovernorateId = governorateId;
+    this.locationService.getAllLocationsCites(governorateId).subscribe(
+      (response: ApiResponse<LocationCity[]>) => {
+        this.cities = response.data;
+        this.setLoading(false);
+      },
+      (error) => {
+        console.error('خطأ في تحميل المدن:', error);
+        this.setLoading(false);
+      }
+    );
+  }
+
+  showAddGovernorate(): void {
+    this.isEditing = false;
+    this.governorateForm.reset();
+    this.showGovernorateModal = true;
+  }
+
+  showEditGovernorate(governorate: LocationGovernorate): void {
+    this.isEditing = true;
+    this.governorateForm.patchValue(governorate);
+    setTimeout(() => {
+      this.showGovernorateModal = true;
+    }, 0);
+  }
+
+  showAddCity(): void {
+    if (!this.selectedGovernorateId) return;
+    this.isEditing = false;
+    this.cityForm.reset({ governorateId: this.selectedGovernorateId });
+    setTimeout(() => {
+      this.showCityModal = true;
+    }, 0);
+  }
+
+  showEditCity(city: LocationCity): void {
+    this.isEditing = true;
+    this.cityForm.patchValue(city);
+    setTimeout(() => {
+      this.showCityModal = true;
+    }, 0);
+  }
+
+  closeGovernorateModal(): void {
+    this.showGovernorateModal = false;
+    this.governorateForm.reset();
+    this.isEditing = false;
+  }
+
+  closeCityModal(): void {
+    this.showCityModal = false;
+    this.cityForm.reset();
+    this.isEditing = false;
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+     this.itemToDelete = null;
+  }
+
+  showDeleteConfirmation(type: 'governorate' | 'city', item: any): void {
+    this.deleteType = type;
+    this.itemToDelete = item;
+    setTimeout(() => {
+      this.showDeleteModal = true;
+    }, 0);
+  }
+
+  onSubmitGovernorate(): void {
+    if (this.governorateForm.invalid) return;
+
+    const governorate = this.governorateForm.value;
+    this.setLoading(true, 'جاري حفظ المحافظة...');
+
+    const request = this.isEditing
+      ? this.locationService.UpdateLocationsGovernorate(governorate)
+      : this.locationService.AddLocationsGovernorate(governorate);
+
+    request.pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.setLoading(false))
+    ).subscribe((response: ApiResponse<LocationGovernorate>) => {
+      this.closeGovernorateModal();
+      this.loadGovernorates();
     }, (error) => {
-      console.error('Error fetching cities:', error);
-      this.isLoading = false;
+      console.error('خطأ في حفظ المحافظة:', error);
     });
   }
 
-  closecityModal() {
-    this.CityModalVisible = false; // Close the city modal
-  }
+  onSubmitCity(): void {
+    if (this.cityForm.invalid) return;
 
-  closeComfirm(): void {
-    this.DeleteModalVisible = false;
-    this.DeleteCityModalVisible = false;
-  }
+    const city = this.cityForm.value;
+    this.setLoading(true, 'جاري حفظ المدينة...');
 
-  showAddGovernorateModal() {
-    this.isEditMode = false; // Set to add mode
-    this.ModalVisible = true;
-    this.selectedEntity = null; // Reset selected governorate for adding a new one
-    this.GovernorateForm.reset(); // Reset the form fields
-    this.isEditMode = false; // Reset selected governorate for adding a new one
-  }
+    const request = this.isEditing
+      ? this.locationService.UpdateLocationsCity(city)
+      : this.locationService.AddLocationsCity(city);
 
-  showAddCityModal(): void {
-    this.isEditMode = false; // Set to add mode
-    this.CityModalVisible = true;
-    this.selectedEntity = null; // Reset selected city for adding a new one
-    this.GovernorateForm.reset(); // Reset the form fields
-  }
-
-  toggleConfirmDelete(id: number, isGovernorate: boolean): void {
-    this.DeleteModalVisible = true; // Show the delete confirmation modal
-    this.isEntityGovernorate = isGovernorate;
-    this.selectedEntity = isGovernorate
-      ? this.ListGovernorate.find((g) => g.id === id) || null
-      : this.ListCity.find((c) => c.id === id) || null;
-
-    if (!this.selectedEntity) {
-      console.error('Error: Entity not found.');
-    }
+    request.pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.setLoading(false))
+    ).subscribe((response: ApiResponse<LocationCity>) => {
+      this.closeCityModal();
+      if (this.selectedGovernorateId) {
+        this.loadCities(this.selectedGovernorateId);
+      }
+    }, (error) => {
+      console.error('خطأ في حفظ المدينة:', error);
+    });
   }
 
   confirmDelete(): void {
-    this.isLoading = true;
-    if (this.selectedEntity) {
-      const deleteObservable = this.isEntityGovernorate
-        ? this.LocationService.DeleteLocationsGovernorate(this.selectedEntity.id)
-        : this.LocationService.DeleteLocationsCity(this.selectedEntity.id);
+    if (!this.deleteType || !this.itemToDelete) return;
 
-      deleteObservable.subscribe(
-        (res) => {
-          console.log(res);
-          this.isLoading = false;
-          this.isEntityGovernorate ? this.getAllGovernorate() : this.getAllCities(this.selectedEntity?.id);
-          this.DeleteModalVisible = false;
-        },
-        (error) => {
-          console.error('Error deleting entity:', error);
-          this.isLoading = false;
-        }
-      );
-    }
-  }
+    this.setLoading(true, 'جاري الحذف...');
+    const request = this.deleteType === 'governorate'
+      ? this.locationService.DeleteLocationsGovernorate(this.itemToDelete.id)
+      : this.locationService.DeleteLocationsCity(this.itemToDelete.id);
 
-  showEditModal(entity: any, isGovernorate: boolean): void {
-    this.isEditMode = true;
-    this.isEntityGovernorate = isGovernorate;
-    this.selectedEntity = entity;
-    this.GovernorateForm.patchValue({
-      nameAr: entity.nameAr,
-      nameEn: entity.nameEn,
-    });
-    this.ModalVisible = isGovernorate;
-    this.CityModalVisible = !isGovernorate;
-  }
+    request.pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.setLoading(false))
+    ).subscribe((response: ApiResponse<void>) => {
+      console.log(this.deleteType == 'governorate');
 
-  showEditCityModal(city: any): void {
-    this.isEditMode = true;
-    this.isEntityGovernorate = false;
-    this.selectedEntity = city;
-    this.GovernorateForm.patchValue({
-      nameAr: city.nameAr,
-      nameEn: city.nameEn,
-    });
-    this.CityModalVisible = true;
-  }
-
-  handleDeleteModalChange(event: boolean): void {
-    this.DeleteModalVisible = event;
-  }
-
-  handleAddModalChange(event: boolean): void {
-    this.AddModalVisible = event;
-  }
-
-  handleModalChange(event: boolean): void {
-    this.ModalVisible = event;
-  }
-
-  onSubmit(): void {
-    console.log(this.isEditMode);
-
-    if (this.GovernorateForm.valid) {
-      const formData = this.GovernorateForm.value;
-      formData.id = this.selectedEntity ? this.selectedEntity.id : 0; // Set ID for update or 0 for new governorate
-      console.log('Form Data:', formData);
-      this.isLoading = true;
-      if (this.isEditMode && this.selectedEntity) {
-        this.LocationService.UpdateLocationsGovernorate(formData).subscribe((res) => {
-          console.log(res);
-          this.isLoading = false;
-          this.getAllGovernorate();
-          this.ModalVisible = false;
-        }, (error) => {
-          console.error('Error adding governorate:', error);
-          this.isLoading = false;
-        });
-      } else {
-        this.LocationService.AddLocationsGovernorate(formData).subscribe((res) => {
-          console.log(res);
-          this.isLoading = false;
-          this.getAllGovernorate();
-          this.ModalVisible = false;
-        }, (error) => {
-          console.error('Error updating governorate:', error);
-          this.isLoading = false;
-        });
+      this.closeDeleteModal();
+      if (this.deleteType == 'governorate') {
+        this.loadGovernorates();
+        this.deleteType = null;
+      } else if (this.selectedGovernorateId) {
+        this.loadCities(this.selectedGovernorateId);
       }
-    } else {
-      console.error('Form is invalid');
-    }
+    }, (error) => {
+      console.error('خطأ في الحذف:', error);
+    });
+  }
+
+  backToGovernorates(): void {
+    this.selectedGovernorateId = null;
+    this.cities = [];
   }
 }

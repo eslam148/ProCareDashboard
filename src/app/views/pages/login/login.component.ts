@@ -1,37 +1,85 @@
-import { Component } from '@angular/core';
-import { NgStyle } from '@angular/common';
-import { IconDirective } from '@coreui/icons-angular';
-import { ContainerComponent, RowComponent, ColComponent, CardGroupComponent, TextColorDirective, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
-import { AuthServicesService } from '../../../../Services/auth-services.service';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { CommonModule } from '@angular/common';
+import { 
+  CardModule, 
+  GridModule, 
+  ButtonModule, 
+  FormModule, 
+  InputGroupComponent, 
+  InputGroupTextDirective, 
+  FormControlDirective,
+  ContainerComponent,
+  RowComponent,
+  ColComponent,
+  CardComponent,
+  CardHeaderComponent,
+  CardBodyComponent
+} from '@coreui/angular';
+import { IconModule } from '@coreui/icons-angular';
+import { AppState } from '../../../store/app.state';
+import * as AuthActions from '../../../store/auth/auth.actions';
+import { selectAuthError, selectAuthLoading } from '../../../store/auth/auth.selectors';
+import { LoadingComponent } from '../../../shared/components/loading/loading.component';
 
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss'],
-    imports: [FormsModule,ContainerComponent, RowComponent, ColComponent, CardGroupComponent, TextColorDirective, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, IconDirective, FormControlDirective, ButtonDirective, NgStyle]
+    standalone: true,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        CardModule,
+        GridModule,
+        ButtonModule,
+        FormModule,
+        InputGroupComponent,
+        InputGroupTextDirective,
+        FormControlDirective,
+        ContainerComponent,
+        RowComponent,
+        ColComponent,
+        CardComponent,
+        CardHeaderComponent,
+        CardBodyComponent,
+        IconModule,
+        LoadingComponent
+    ]
 })
-export class LoginComponent {
-  phoneNumber:string ="";
-  password:string="";
-  constructor(private authService: AuthServicesService, private router: Router) {
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/']); // Redirect to '/' if already authenticated
-    }
-  }
+export class LoginComponent implements OnInit {
+    loginForm!: FormGroup;
+    loading$;
+    error$;
 
-  login(credentials: { phoneNumber: string; password: string }) {
-    this.authService.login(credentials).subscribe({
-      next: (response) => {
-        if(response.status != 1){
-        localStorage.setItem('authToken', response.data.token); // Assuming response contains a token
-        this.router.navigate(['/']); // Redirect to '/' on successful login
+    constructor(
+        private fb: FormBuilder,
+        private store: Store<AppState>,
+        private router: Router
+    ) {
+        this.loading$ = this.store.select(selectAuthLoading);
+        this.error$ = this.store.select(selectAuthError);
+        this.loginForm = this.fb.group({
+            username: ['', [Validators.required, Validators.pattern(/^[0-9]{11}$/)]],
+            password: ['', [Validators.required, Validators.minLength(6)]]
+        });
+    }
+
+    ngOnInit(): void {
+        this.error$.subscribe(error => {
+            if (error) {
+                this.loginForm.enable();
+            }
+        });
+    }
+
+    onSubmit(): void {
+        if (this.loginForm.valid) {
+            this.loginForm.disable();
+            const { username, password } = this.loginForm.value;
+            this.store.dispatch(AuthActions.login({ username, password }));
         }
-      },
-      error: (error) => {
-        console.error('Login failed', error);
-      }
-    });
-  }
+    }
 }

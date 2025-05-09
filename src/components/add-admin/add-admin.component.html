@@ -4,39 +4,93 @@
       <c-col lg="12" md="12" xl="12">
         <!-- Removed bg-white, rounded-4, shadow-sm, and adjusted padding -->
         <div class="p-3 p-md-4 w-100">
-          <form (ngSubmit)="onRegister()">
-            <div class="mb-3">
-              <label for="firstName" class="form-label">First Name</label>
-              <input type="text" id="firstName" class="form-control" [(ngModel)]="firstName" name="firstName" required>
-              <div *ngIf="!firstName.trim() && submitted" class="text-danger">First Name is required.</div>
-            </div>
+          <c-card>
+            <c-card-header>
+              <strong>إضافة مشرف جديد</strong>
+            </c-card-header>
+            <c-card-body>
+              <form [formGroup]="adminForm" (ngSubmit)="onSubmit()">
+                <c-row>
+                  <c-col xs="12" md="6">
+                    <div class="mb-3">
+                      <label cFormLabel for="firstName">الاسم الأول</label>
+                      <input
+                        type="text"
+                        cFormControl
+                        id="firstName"
+                        formControlName="firstName"
+                        [ngClass]="{'is-invalid': adminForm.get('firstName')?.invalid && adminForm.get('firstName')?.touched}"
+                      >
+                      <div class="invalid-feedback" *ngIf="adminForm.get('firstName')?.invalid && adminForm.get('firstName')?.touched">
+                        الاسم الأول مطلوب
+                      </div>
+                    </div>
+                  </c-col>
+                  <c-col xs="12" md="6">
+                    <div class="mb-3">
+                      <label cFormLabel for="lastName">الاسم الأخير</label>
+                      <input
+                        type="text"
+                        cFormControl
+                        id="lastName"
+                        formControlName="lastName"
+                        [ngClass]="{'is-invalid': adminForm.get('lastName')?.invalid && adminForm.get('lastName')?.touched}"
+                      >
+                      <div class="invalid-feedback" *ngIf="adminForm.get('lastName')?.invalid && adminForm.get('lastName')?.touched">
+                        الاسم الأخير مطلوب
+                      </div>
+                    </div>
+                  </c-col>
+                </c-row>
 
-            <div class="mb-3">
-              <label for="lastName" class="form-label">Last Name</label>
-              <input type="text" id="lastName" class="form-control" [(ngModel)]="lastName" name="lastName" required>
-              <div *ngIf="!lastName.trim() && submitted" class="text-danger">Last Name is required.</div>
-            </div>
+                <div class="mb-3">
+                  <label cFormLabel for="phoneNumber">رقم الهاتف</label>
+                  <input
+                    type="tel"
+                    cFormControl
+                    id="phoneNumber"
+                    formControlName="phoneNumber"
+                    [ngClass]="{'is-invalid': adminForm.get('phoneNumber')?.invalid && adminForm.get('phoneNumber')?.touched}"
+                  >
+                  <div class="invalid-feedback" *ngIf="adminForm.get('phoneNumber')?.invalid && adminForm.get('phoneNumber')?.touched">
+                    رقم الهاتف يجب أن يكون 11 رقم
+                  </div>
+                </div>
 
-            <div class="mb-3">
-              <label for="phoneNumber" class="form-label">Phone Number</label>
-              <input type="text" id="phoneNumber" class="form-control" [(ngModel)]="phoneNumber" name="phoneNumber" required>
-              <div *ngIf="!phoneNumber.trim() && submitted" class="text-danger">Phone Number is required.</div>
-            </div>
+                <div class="mb-3">
+                  <label cFormLabel for="password">كلمة المرور</label>
+                  <input
+                    type="password"
+                    cFormControl
+                    id="password"
+                    formControlName="password"
+                    [ngClass]="{'is-invalid': adminForm.get('password')?.invalid && adminForm.get('password')?.touched}"
+                  >
+                  <div class="invalid-feedback" *ngIf="adminForm.get('password')?.invalid && adminForm.get('password')?.touched">
+                    كلمة المرور يجب أن تكون 6 أحرف على الأقل
+                  </div>
+                </div>
 
-            <div class="mb-3">
-              <label for="password" class="form-label">Password</label>
-              <input type="password" id="password" class="form-control" [(ngModel)]="password" name="password" required>
-              <div *ngIf="password.length < 6 && submitted" class="text-danger">Password must be at least 6 characters long.</div>
-            </div>
+                <div class="mb-3">
+                  <label cFormLabel for="confirmPassword">تأكيد كلمة المرور</label>
+                  <input
+                    type="password"
+                    cFormControl
+                    id="confirmPassword"
+                    formControlName="confirmPassword"
+                    [ngClass]="{'is-invalid': adminForm.get('confirmPassword')?.invalid && adminForm.get('confirmPassword')?.touched}"
+                  >
+                  <div class="invalid-feedback" *ngIf="adminForm.get('confirmPassword')?.invalid && adminForm.get('confirmPassword')?.touched">
+                    كلمة المرور غير متطابقة
+                  </div>
+                </div>
 
-            <div class="mb-3">
-              <label for="confirmPassword" class="form-label">Confirm Password</label>
-              <input type="password" id="confirmPassword" class="form-control" [(ngModel)]="confirmPassword" name="confirmPassword" required>
-              <div *ngIf="password !== confirmPassword && submitted" class="text-danger">Passwords do not match.</div>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Register</button>
-          </form>
+                <button cButton color="primary" type="submit" [disabled]="adminForm.invalid">
+                  إضافة المشرف
+                </button>
+              </form>
+            </c-card-body>
+          </c-card>
         </div>
       </c-col>
     </c-row>

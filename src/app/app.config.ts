@@ -1,37 +1,36 @@
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { authInterceptor } from './../interceptors/auth.interceptor'; // Your interceptor file
- import {
-  provideRouter,
-  withEnabledBlockingInitialNavigation,
-  withHashLocation,
-  withInMemoryScrolling,
-  withRouterConfig,
-  withViewTransitions
-} from '@angular/router';
-
-import { DropdownModule, SidebarModule } from '@coreui/angular';
-import { IconSetService } from '@coreui/icons-angular';
+import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
+import { provideClientHydration } from '@angular/platform-browser';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { environment } from '../environments/environment';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { reducers } from './store/app.state';
+import { AuthEffects } from './store/auth/auth.effects';
+import { SidebarModule, SidebarNavHelper } from '@coreui/angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes,
-      withRouterConfig({
-        onSameUrlNavigation: 'reload'
-      }),
-      withInMemoryScrolling({
-        scrollPositionRestoration: 'top',
-        anchorScrolling: 'enabled'
-      }),
-      withEnabledBlockingInitialNavigation(),
-      withViewTransitions(),
-      withHashLocation()
+    provideRouter(routes),
+    provideClientHydration(),
+    provideAnimations(),
+    provideHttpClient(
+      withInterceptors([AuthInterceptor])
     ),
-    importProvidersFrom(SidebarModule, DropdownModule),
-    IconSetService,
-    provideAnimationsAsync(),
-    provideHttpClient(withInterceptors([authInterceptor]))
+    provideStore(reducers),
+    provideEffects([AuthEffects]),
+    provideStoreDevtools({
+      maxAge: 25,
+      logOnly: environment.production,
+      autoPause: true,
+      trace: false,
+      traceLimit: 75,
+    }),
+    importProvidersFrom(SidebarModule),
+    SidebarNavHelper
   ]
 };

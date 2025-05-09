@@ -3,77 +3,72 @@ import { Injectable } from '@angular/core';
 import { LocationCity, LocationGovernorate } from '../app/Model/Locaton';
 import { GeneralResponse } from '../app/Model/GeneralResponse';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
+
+interface ApiResponse<T> {
+  data: T;
+  status: number;
+  message: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocationService {
-  // Define the base URL for the API
-  private baseUrl ="http://procare.runasp.net" // environment.API_URL; // Use API_URL from environment
-  // Define the headers for the HTTP requests
-  
-  constructor(private http:HttpClient) { }
-  // Method to get all locations
-  getAllLocationsGovernorate():Observable<GeneralResponse<LocationGovernorate[]>> {
-    return this.http.get<GeneralResponse<LocationGovernorate[]>>(this.baseUrl+ '/api/Governorate/GetAllGovernorates');
-  }
-  // Method to get a location by ID
-  getLocationsGovernorateById(id: number):Observable<GeneralResponse<LocationGovernorate>> {
-    return this.http.get<GeneralResponse<LocationGovernorate>>(`${this.baseUrl}/api/Governorate/GetGovernorateById/${id}`);
-  }
-  getLocationsGovernorateDelete(id: number):Observable<GeneralResponse<LocationGovernorate>> {
-    return this.http.get<GeneralResponse<LocationGovernorate>>(`${this.baseUrl}/api/Governorate/DeleteGovernorate/${id}`);
-  }
-  AddLocationsGovernorate(location: LocationGovernorate):Observable<GeneralResponse<LocationGovernorate>> {
-    return this.http.post<GeneralResponse<LocationGovernorate>>(`${this.baseUrl}/api/Governorate/AddGovernorate`, location);
-  }
-  UpdateLocationsGovernorate(location: LocationGovernorate):Observable<GeneralResponse<LocationGovernorate>> {
-    return this.http.put<GeneralResponse<LocationGovernorate>>(`${this.baseUrl}/api/Governorate/UpdateGovernorate`, location);
-  }
-  DeleteLocationsGovernorate(id: number):Observable<GeneralResponse<LocationGovernorate>> { 
-    return this.http.delete<GeneralResponse<LocationGovernorate>>(`${this.baseUrl}/api/Governorate/DeleteGovernorate?id=${id}`);
+  private apiUrl = environment.API_URL;
+
+  constructor(private http: HttpClient) { }
+
+  // المحافظات
+  getAllLocationsGovernorate(): Observable<ApiResponse<LocationGovernorate[]>> {
+    return this.http.get<ApiResponse<LocationGovernorate[]>>(`${this.apiUrl}/api/Governorate/GetAllGovernorates`);
   }
 
-  AddLocationsCity(location: LocationCity):Observable<GeneralResponse<LocationCity>> {
-    return this.http.post<GeneralResponse<LocationCity>>(`${this.baseUrl}/api/City/AddCity`, location);
+  getLocationsGovernorateById(id: number): Observable<ApiResponse<LocationGovernorate>> {
+    return this.http.get<ApiResponse<LocationGovernorate>>(`${this.apiUrl}/api/Location/GetLocationsGovernorateById/${id}`);
   }
-  UpdateLocationsCity(location: LocationCity):Observable<GeneralResponse<LocationCity>> {
-    return this.http.put<GeneralResponse<LocationCity>>(`${this.baseUrl}/api/City/UpdateCity`, location);
+
+  AddLocationsGovernorate(governorate: Partial<LocationGovernorate>): Observable<ApiResponse<LocationGovernorate>> {
+    return this.http.post<ApiResponse<LocationGovernorate>>(`${this.apiUrl}/api/Governorate/AddGovernorate`, governorate);
   }
-  DeleteLocationsCity(id: number):Observable<GeneralResponse<LocationCity>> {
-    return this.http.delete<GeneralResponse<LocationCity>>(`${this.baseUrl}/api/City/DeleteCity?id=${id}`);
+
+  UpdateLocationsGovernorate(governorate: LocationGovernorate): Observable<ApiResponse<LocationGovernorate>> {
+    return this.http.put<ApiResponse<LocationGovernorate>>(`${this.apiUrl}/api/Governorate/DeleteGovernorate`, governorate);
   }
-  // Method to create a new location
-  // createLocationsGovernorate(location: any) {
-  //   return this.http.post(this.baseUrl, location);
-  // }
-  // // Method to update an existing location
-  // updateLocationsGovernorate(id: number, location: any) {
-  //   return this.http.put(`${this.baseUrl}/${id}`, location);
-  // }
-  // // Method to delete a location
-  // deleteLocationsGovernorate(id: number) {
-  //   return this.http.delete(`${this.baseUrl}/${id}`);
-  // }
-  
-  getAllLocationsCites(id: number) {
-    return this.http.get(`${this.baseUrl}/${id}`);
+
+  DeleteLocationsGovernorate(id: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/api/Governorate/DeleteGovernorate?id=${id}`);
   }
+
+  // المدن
+  getAllLocationsCites(governorateId: number): Observable<ApiResponse<LocationCity[]>> {
+    return this.http.get<ApiResponse<LocationCity[]>>(`${this.apiUrl}/api/City/GetCityByGovernorateId/${governorateId}`);
+  }
+
+  getLocationsCityById(id: number): Observable<ApiResponse<LocationCity>> {
+    return this.http.get<ApiResponse<LocationCity>>(`${this.apiUrl}/api/Location/GetLocationsCityById/${id}`);
+  }
+
+  AddLocationsCity(city: Partial<LocationCity>): Observable<ApiResponse<LocationCity>> {
+    return this.http.post<ApiResponse<LocationCity>>(`${this.apiUrl}/api/City/AddCity`, city);
+  }
+
+  UpdateLocationsCity(city: LocationCity): Observable<ApiResponse<LocationCity>> {
+    return this.http.put<ApiResponse<LocationCity>>(`${this.apiUrl}/api/City/UpdateCity`, city);
+  }
+
+  DeleteLocationsCity(id: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/api/City/DeleteCity?id=${id}`);
+  }
+
+  // Method to get a location by ID
+  getLocationsGovernorateDelete(id: number):Observable<GeneralResponse<LocationGovernorate>> {
+    return this.http.get<GeneralResponse<LocationGovernorate>>(`${this.apiUrl}/api/Governorate/DeleteGovernorate/${id}`);
+  }
+
   // Method to get a location by ID
   getCityByGovernorateId(id: number):Observable<GeneralResponse<LocationCity[]>> {
-    return this.http.get<GeneralResponse<LocationCity[]>>(`${this.baseUrl}/api/City/GetCityByGovernorateId/${id}`);
+    return this.http.get<GeneralResponse<LocationCity[]>>(`${this.apiUrl}/api/City/GetCityByGovernorateId/${id}`);
   }
-  // Method to create a new location
-  // createLocationsGovernorate(location: any) {
-  //   return this.http.post(this.baseUrl, location);
-  // }
-  // // Method to update an existing location
-  // updateLocationsGovernorate(id: number, location: any) {
-  //   return this.http.put(`${this.baseUrl}/${id}`, location);
-  // }
-  // // Method to delete a location
-  // deleteLocationsGovernorate(id: number) {
-  //   return this.http.delete(`${this.baseUrl}/${id}`);
-  // }
-  
 }
+

@@ -1,56 +1,72 @@
-import { AuthServicesService } from 'src/Services/auth-services.service';
 import { Component } from '@angular/core';
-import { IconDirective } from '@coreui/icons-angular';
-import { ContainerComponent, RowComponent, ColComponent, TextColorDirective, FormDirective, InputGroupComponent, InputGroupTextDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthServicesService } from '../../Services/auth-services.service';
+import { CommonModule } from '@angular/common';
+import { 
+  CardBodyComponent, 
+  CardComponent, 
+  CardHeaderComponent, 
+  ColComponent, 
+  RowComponent, 
+  FormControlDirective, 
+  ButtonDirective,
+  ContainerComponent
+} from '@coreui/angular';
 
 @Component({
   selector: 'app-add-admin',
-  imports: [CommonModule, FormsModule, ContainerComponent, RowComponent, ColComponent],
   templateUrl: './add-admin.component.html',
-  styleUrl: './add-admin.component.scss'
+  styleUrls: ['./add-admin.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    CardBodyComponent,
+    CardComponent,
+    CardHeaderComponent,
+    ColComponent,
+    RowComponent,
+    FormControlDirective,
+    ButtonDirective,
+    ContainerComponent
+  ]
 })
 export class AddAdminComponent {
-  firstName: string = '';
-  lastName: string = '';
-  phoneNumber: string = '';
-  password: string = '';
-  confirmPassword: string = '';
-  submitted: boolean = false; // Tracks form submission
+  adminForm: FormGroup;
 
-  constructor(private authService: AuthServicesService, private router: Router) { }
-
-  onRegister() {
-    this.submitted = true; // Mark the form as submitted
-
-    if (!this.firstName.trim() || !this.lastName.trim() || !this.phoneNumber.trim() || !this.password.trim() || !this.confirmPassword.trim()) {
-      return; // Stop if any field is empty
-    }
-
-    if (this.password.length < 6) {
-      return; // Stop if password is too short
-    }
-
-    if (this.password !== this.confirmPassword) {
-      return; // Stop if passwords do not match
-    }
-
-    const user = {
-      firstName: this.firstName,
-      lastName: this.lastName,
-      phoneNumber: this.phoneNumber,
-      password: this.password,
-      confirmPassword: this.confirmPassword
-    };
-
-    this.authService.register(user).subscribe({
-      next: () => {
-        alert('Registration successful!');
-        this.router.navigate(['show-admin']); // Redirect to show-admin on success
-      },
-      error: (err) => alert('Registration failed: ' + err.message)
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthServicesService,
+    private router: Router
+  ) {
+    this.adminForm = this.fb.group({
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9]{11}$')]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    }, {
+      validators: this.passwordMatchValidator
     });
+  }
+
+  passwordMatchValidator(form: FormGroup) {
+    const password = form.get('password')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+    return password === confirmPassword ? null : { passwordMismatch: true };
+  }
+
+  onSubmit() {
+    if (this.adminForm.valid) {
+      this.authService.register(this.adminForm.value).subscribe({
+        next: () => {
+          alert('تم إضافة المشرف بنجاح');
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err: Error) => alert('فشل إضافة المشرف: ' + err.message)
+      });
+    }
   }
 }

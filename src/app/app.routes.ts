@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { DefaultLayoutComponent } from './layout';
-import { authGuard } from '../auth/auth.guard';
+import { AuthGuard } from '../auth/auth.guard';
 
 export const routes: Routes = [
   {
@@ -19,83 +19,82 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes),
-        canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'theme',
         loadChildren: () => import('./views/theme/routes').then((m) => m.routes),
-        canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'base',
         loadChildren: () => import('./views/base/routes').then((m) => m.routes),
-        canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'buttons',
         loadChildren: () => import('./views/buttons/routes').then((m) => m.routes),
-        canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'forms',
         loadChildren: () => import('./views/forms/routes').then((m) => m.routes),
-        canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'icons',
         loadChildren: () => import('./views/icons/routes').then((m) => m.routes),
-        canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'notifications',
         loadChildren: () => import('./views/notifications/routes').then((m) => m.routes),
-        canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'widgets',
         loadChildren: () => import('./views/widgets/routes').then((m) => m.routes),
-        canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'charts',
         loadChildren: () => import('./views/charts/routes').then((m) => m.routes),
-        canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'pages',
         loadChildren: () => import('./views/pages/routes').then((m) => m.routes),
-          canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'Add-Admin',
         loadComponent: () =>
           import('../components/add-admin/add-admin.component').then((m) => m.AddAdminComponent),
-          canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'Show-Admins',
         loadComponent: () =>
           import('../components/show-admins/show-admins.component').then((m) => m.ShowAdminsComponent),
-        canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
-
       {
         path: 'Category',
         loadComponent: () =>
           import('../components/category/category.component').then((m) => m.CategoryComponent),
-        canActivate: [authGuard]  
+        canActivate: [AuthGuard]  
       },
       {
         path: 'AddNures',
         loadComponent: () =>
           import('../components/add-nures/add-nures.component').then((m) => m.AddNuresComponent),
-        canActivate: [authGuard]  // Apply the authGuard to the lazy-loaded route
+        canActivate: [AuthGuard]
       },
       {
         path: 'Location',
         loadComponent: () =>
           import('../components/location/location.component').then((m) => m.LocationComponent),
-        canActivate: [authGuard]   
+        canActivate: [AuthGuard]   
       },
     ]
   },

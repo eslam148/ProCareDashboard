@@ -1,231 +1,177 @@
-<!-- <div class="loading-overlay"> -->
-         <div class="fade show"  *ngIf="isLoading" style="text-align: center; padding-top: calc(100vh / 2); height: 100vh">
-            <!-- <i class="spinner-grow spinner-grow-sm"></i>
-            <span class="m-1">Loading...</span> -->
-         <c-spinner color="primary" />
+<!-- شاشة التحميل -->
+<div class="loading-overlay" *ngIf="isLoading">
+  <div class="loading-spinner">
+    <c-spinner></c-spinner>
+    <p>{{ loadingMessage }}</p>
+  </div>
+</div>
 
-         </div>
-   
-        <!-- </div> -->
-   <c-row>
-    <c-col xs>
-      <c-card class="mb-4 shadow-sm">
-        <c-card-body>
-          <button class="btn btn-primary mb-3" [disabled]="isLoading" (click)="showAddGovernorateModal()">Add Governorate</button>
-          <div class="table-responsive">
-            <table
-              [hover]="true"
-              [responsive]="true"
-              [striped]="true"
-              align="middle"
-              cTable
-              class="table table-bordered table-hover text-center"
-            >
-              <thead class="table-light">
-                <tr>
-                  <th></th>
-                  <th>Name</th>
-                  <th>الاسم</th>
-                  
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- [ngClass]="{ 'table-danger': category.isDeleted }" -->
-                <tr *ngFor="let Governorate of ListGovernorate; let i = index">
-                    <td>{{ i + 1 }}</td>
-                  <td>{{ Governorate.nameEn }}</td>
-                  <td>{{ Governorate.nameAr }}</td>
-              
-                  <td>
-                    <button class="btn btn-danger btn-sm me-1" (click)="toggleConfirmDelete(Governorate.id, true)" [disabled]="isLoading">Delete</button>
-                    <button class="btn btn-primary btn-sm me-1" (click)="showEditModal(Governorate, true)" [disabled]="isLoading">Edit</button>
-                    <button class="btn btn-secondary btn-sm me-1" (click)="ShowCityCategory(Governorate.id)" [disabled]="isLoading">Show City</button>
-                    <button class="btn btn-info btn-sm" (click)="ShowAddCity(Governorate.id)" [disabled]="isLoading">Add City</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </c-card-body>
-      </c-card>
-    </c-col>
-</c-row>
-  
-<ng-container *ngIf="DeleteModalVisible">
-    <c-modal id="confirmDeleteModal" [visible]="DeleteModalVisible" (visibleChange)="handleDeleteModalChange($event)" style="z-index: 1050;">
-      <c-modal-header>
-        <h5 cModalTitle class="text-danger">Confirm Delete</h5>
-      </c-modal-header>
-      <c-modal-body>
-        Are you sure you want to delete <strong>{{ selectedEntity?.nameAr }}</strong>?
-      </c-modal-body>
-      <c-modal-footer>
-        <button class="btn btn-secondary" (click)="closeComfirm()">Close</button>
-        <button type="button" class="btn btn-danger" (click)="confirmDelete()">Delete</button>
-      </c-modal-footer>
-    </c-modal>
-  </ng-container>
-  <ng-container *ngIf="ModalVisible">
-    <ng-container *ngTemplateOutlet="GovernorateModal"></ng-container>
-  </ng-container>
-  <ng-template #GovernorateModal>
-    <c-modal id="governorateModal" 
-    (visibleChange)="handleModalChange($event)"
-    [visible]="ModalVisible" >
-       
-      <form [formGroup]="GovernorateForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
-        <c-modal-header>
-          <h5 cModalTitle class="text-primary">{{ isEditMode ? 'Edit Governorate' : 'Add Governorate' }}</h5>
-        </c-modal-header>
-        <c-modal-body>
-          <div class="mb-3">
-            <label for="nameAr" class="form-label">Name (Arabic)</label>
-            <input type="text" id="nameAr" class="form-control" formControlName="nameAr">
-            <div *ngIf="GovernorateForm.get('nameAr')?.invalid && GovernorateForm.get('nameAr')?.touched" class="text-danger">
-              Name in Arabic is required.
+<!-- عرض المحافظات -->
+<c-card *ngIf="!selectedGovernorateId">
+  <c-card-header>
+    <h3>المحافظات</h3>
+    <button cButton color="primary" (click)="showAddGovernorate()">
+      <i class="cil-plus"></i> إضافة محافظة
+    </button>
+  </c-card-header>
+  <c-card-body>
+    <table cTable>
+      <thead>
+        <tr>
+          <th>الاسم بالعربية</th>
+          <th>الاسم بالإنجليزية</th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let governorate of governorates">
+          <td>{{ governorate.nameAr }}</td>
+          <td>{{ governorate.nameEn }}</td>
+          <td>
+            <div class="btn-group">
+              <button cButton color="info" (click)="loadCities(governorate.id)">
+                <i class="cil-list"></i> المدن
+              </button>
+              <button cButton color="warning" (click)="showEditGovernorate(governorate)">
+                <i class="cil-pencil"></i> تعديل
+              </button>
+              <button cButton color="danger" (click)="showDeleteConfirmation('governorate', governorate)">
+                <i class="cil-trash"></i> حذف
+              </button>
             </div>
-          </div>
-  
-          <div class="mb-3">
-            <label for="nameEn" class="form-label">Name (English)</label>
-            <input type="text" id="nameEn" class="form-control" formControlName="nameEn">
-            <div *ngIf="GovernorateForm.get('nameEn')?.invalid && GovernorateForm.get('nameEn')?.touched" class="text-danger">
-              Name in English is required.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </c-card-body>
+</c-card>
+
+<!-- عرض المدن -->
+<c-card *ngIf="selectedGovernorateId">
+  <c-card-header>
+    <div class="d-flex justify-content-between align-items-center">
+      <button cButton color="secondary" (click)="backToGovernorates()">
+        <i class="cil-arrow-left"></i> العودة للمحافظات
+      </button>
+      <button cButton color="primary" (click)="showAddCity()">
+        <i class="cil-plus"></i> إضافة مدينة
+      </button>
+    </div>
+  </c-card-header>
+  <c-card-body>
+    <table cTable>
+      <thead>
+        <tr>
+          <th>الاسم بالعربية</th>
+          <th>الاسم بالإنجليزية</th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let city of cities">
+          <td>{{ city.nameAr }}</td>
+          <td>{{ city.nameEn }}</td>
+          <td>
+            <div class="btn-group">
+              <button cButton color="warning" (click)="showEditCity(city)">
+                <i class="cil-pencil"></i> تعديل
+              </button>
+              <button cButton color="danger" (click)="showDeleteConfirmation('city', city)">
+                <i class="cil-trash"></i> حذف
+              </button>
             </div>
-          </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </c-card-body>
+</c-card>
 
-        </c-modal-body>
-        <c-modal-footer>
-          <button type="submit" class="btn btn-primary" [disabled]="GovernorateForm.invalid">{{ isEditMode ? 'Save Changes' : 'Add Governorate' }}</button>
-        </c-modal-footer>
-      </form>
-    </c-modal>
-  </ng-template>
+<!-- نافذة إضافة/تعديل محافظة -->
+<c-modal [visible]="showGovernorateModal" (visibleChange)="!showGovernorateModal && closeGovernorateModal()">
+  <c-modal-header>
+    <h5>{{ isEditing ? 'تعديل محافظة' : 'إضافة محافظة' }}</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <form [formGroup]="governorateForm" (ngSubmit)="onSubmitGovernorate()">
+      <div class="mb-3">
+        <label class="form-label">الاسم بالعربية</label>
+        <input type="text" class="form-control" formControlName="nameAr">
+        <div class="invalid-feedback" *ngIf="governorateForm.get('nameAr')?.errors?.['required']">
+          الاسم بالعربية مطلوب
+        </div>
+        <div class="invalid-feedback" *ngIf="governorateForm.get('nameAr')?.errors?.['minlength']">
+          يجب أن يكون الاسم 3 أحرف على الأقل
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">الاسم بالإنجليزية</label>
+        <input type="text" class="form-control" formControlName="nameEn">
+        <div class="invalid-feedback" *ngIf="governorateForm.get('nameEn')?.errors?.['required']">
+          الاسم بالإنجليزية مطلوب
+        </div>
+        <div class="invalid-feedback" *ngIf="governorateForm.get('nameEn')?.errors?.['minlength']">
+          يجب أن يكون الاسم 3 أحرف على الأقل
+        </div>
+      </div>
+    </form>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeGovernorateModal()">إلغاء</button>
+    <button cButton color="primary" (click)="onSubmitGovernorate()" [disabled]="governorateForm.invalid">
+      {{ isEditing ? 'تحديث' : 'إضافة' }}
+    </button>
+  </c-modal-footer>
+</c-modal>
 
-    <ng-container *ngIf="AddCityModalVisible">
-        <ng-container *ngTemplateOutlet="CityModal"></ng-container>
-    </ng-container>
-    <ng-template #CityModal>
-        <c-modal id="cityModal" [visible]="AddCityModalVisible" (visibleChange)="handleAddCityModalChange($event)">
-            <form [formGroup]="GovernorateForm" (ngSubmit)="onSubmitCity()" enctype="multipart/form-data">
+<!-- نافذة إضافة/تعديل مدينة -->
+<c-modal [visible]="showCityModal" (visibleChange)="!showCityModal && closeCityModal()">
+  <c-modal-header>
+    <h5>{{ isEditing ? 'تعديل مدينة' : 'إضافة مدينة' }}</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <form [formGroup]="cityForm" (ngSubmit)="onSubmitCity()">
+      <div class="mb-3">
+        <label class="form-label">الاسم بالعربية</label>
+        <input type="text" class="form-control" formControlName="nameAr">
+        <div class="invalid-feedback" *ngIf="cityForm.get('nameAr')?.errors?.['required']">
+          الاسم بالعربية مطلوب
+        </div>
+        <div class="invalid-feedback" *ngIf="cityForm.get('nameAr')?.errors?.['minlength']">
+          يجب أن يكون الاسم 3 أحرف على الأقل
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">الاسم بالإنجليزية</label>
+        <input type="text" class="form-control" formControlName="nameEn">
+        <div class="invalid-feedback" *ngIf="cityForm.get('nameEn')?.errors?.['required']">
+          الاسم بالإنجليزية مطلوب
+        </div>
+        <div class="invalid-feedback" *ngIf="cityForm.get('nameEn')?.errors?.['minlength']">
+          يجب أن يكون الاسم 3 أحرف على الأقل
+        </div>
+      </div>
+    </form>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeCityModal()">إلغاء</button>
+    <button cButton color="primary" (click)="onSubmitCity()" [disabled]="cityForm.invalid">
+      {{ isEditing ? 'تحديث' : 'إضافة' }}
+    </button>
+  </c-modal-footer>
+</c-modal>
 
-            <c-modal-header>
-                <h5 cModalTitle class="text-primary">City</h5>
-            </c-modal-header>
-            <c-modal-body>
-                    <div class="mb-3">
-                        <label for="nameAr" class="form-label">Name (Arabic)</label>
-                        <input type="text" id="nameAr" class="form-control" formControlName="nameAr">
-                        <div *ngIf="GovernorateForm.get('nameAr')?.invalid && GovernorateForm.get('nameAr')?.touched" class="text-danger">
-                            Name in Arabic is required.
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="nameEn" class="form-label">Name (English)</label>
-                        <input type="text" id="nameEn" class="form-control" formControlName="nameEn">
-                        <div *ngIf="GovernorateForm.get('nameEn')?.invalid && GovernorateForm.get('nameEn')?.touched" class="text-danger">
-                            Name in English is required.
-                        </div>
-                    </div>
-
-                    <!-- <button type="submit" class="btn btn-primary" [disabled]="GovernorateForm.invalid">Submit</button> -->
-                
-            </c-modal-body>
-            <c-modal-footer>
-                <button type="submit" class="btn btn-primary" [disabled]="GovernorateForm.invalid">Add City</button>
-            </c-modal-footer>
-        </form>
-        </c-modal>
-    </ng-template>
-
-    <ng-container *ngIf="CityModalVisible">
-        <ng-container *ngTemplateOutlet="ShowCityModal"></ng-container>
-    </ng-container>
- 
-    <ng-template #ShowCityModal>
-        <c-modal 
-          #modalLg 
-          id="modalLg" 
-          size="xl"
-          [scrollable]="true"
-          id="subCategoryModal" 
-          [visible]="CityModalVisible" 
-          (visibleChange)="handleCityModalChange($event)"
-        >
-          <c-modal-header>
-            <h5 cModalTitle class="text-primary">Cities</h5>
-          </c-modal-header>
-          <c-modal-body>
-            <div class="table-responsive">
-              <table
-                [hover]="true"
-                [responsive]="true"
-                [striped]="true"
-                align="middle"
-                cTable
-                class="table table-bordered table-hover text-center"
-              >
-                <thead class="table-light">
-                  <tr>
-                    <th></th>
-                    <th>Name</th>
-                    <th>الاسم</th>
-                  
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let City of ListCity; let i = index">
-                        <td>{{ i + 1 }}</td>
-                        <td>{{ City.nameEn }}</td>
-                        <td>{{ City.nameAr }}</td>
-                    
-                        <td>
-                        <button class="btn btn-danger btn-sm me-1" (click)="toggleConfirmDelete(City.id, false)" [disabled]="isLoading">Delete</button>
-                        <button class="btn btn-primary btn-sm me-1" (click)="showEditCityModal(City)" [disabled]="isLoading">Edit</button>
-                        <!-- <button class="btn btn-secondary btn-sm me-1" (click)="ShowCityCategory(category.id)" [disabled]="isLoading">Show City</button> -->
-                        <!-- <button class="btn btn-info btn-sm" (click)="ShowsubCategory(category.id)" [disabled]="isLoading">Show SubCategory</button> -->
-                        </td>
-                    </tr>
-                </tbody>
-              </table>
-            </div>
-          </c-modal-body>
-          <c-modal-footer>
-            <button 
-              class="btn btn-secondary" 
-              (click)="closecityModal()"
-            >
-              Close
-            </button>
-          </c-modal-footer>
-        </c-modal>
-      </ng-template>
-      
-
-
-
-
-
-
-
-    <ng-container *ngIf="DeleteCityModalVisible">
-        <ng-container *ngTemplateOutlet="ComfirmDeleteCityModal"></ng-container>
-      </ng-container>
-      <ng-template #ComfirmDeleteCityModal>
-        <c-modal id="confirmDeleteCityModal" [visible]="DeleteCityModalVisible" (visibleChange)="handleDeleteModalChange($event)">
-          <c-modal-header>
-            <h5 cModalTitle class="text-danger">Confirm Delete</h5>
-          </c-modal-header>
-          <c-modal-body>
-            Are you sure you want to delete <strong>{{ selectedEntity?.nameAr }}</strong>?
-          </c-modal-body>
-          <c-modal-footer>
-            <button class="btn btn-secondary" (click)="closeComfirm()">Close</button>
-            <button type="button" class="btn btn-danger" (click)="confirmDelete()">Delete</button>
-          </c-modal-footer>
-        </c-modal>
-      </ng-template>
+<!-- نافذة تأكيد الحذف -->
+<c-modal [visible]="showDeleteModal" (visibleChange)="!showDeleteModal && closeDeleteModal()">
+  <c-modal-header>
+    <h5>تأكيد الحذف</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <p>هل أنت متأكد من حذف {{ deleteType === 'governorate' ? 'المحافظة' : 'المدينة' }}؟</p>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeDeleteModal()">إلغاء</button>
+    <button cButton color="danger" (click)="confirmDelete()">حذف</button>
+  </c-modal-footer>
+</c-modal>
 
